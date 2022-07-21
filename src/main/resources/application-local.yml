@@ -1,0 +1,14 @@
+
+server:
+  port: 8081
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          filter:
+            CommonsRequestLoggingFilter: debug
+
+application:
+  customVal: sampleVal2
