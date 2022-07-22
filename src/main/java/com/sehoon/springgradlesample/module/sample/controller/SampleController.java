@@ -5,6 +5,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sehoon.springgradlesample.common.mci.util.DpMciUtil;
+import com.sehoon.springgradlesample.common.vo.CmciVO;
+import com.sehoon.springgradlesample.common.vo.GenericVO;
+import com.sehoon.springgradlesample.common.vo.SpecifyDataVO;
 import com.sehoon.springgradlesample.config.ApplicationProperties;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +37,22 @@ public class SampleController {
     }
 
     @GetMapping("/hello-world2")
-    public String helloWorld2() {
+    public String helloWorld2() throws Exception {
         String word = applicationProperties.getCustomVal();
-        log.debug(word);
+        // CmciVO testVO = new CmciVO();
+
+        // DpMciUtil.mciCallSerivce(testVO, "ee");
+
+        GenericVO<SpecifyDataVO> genericVO = new GenericVO<SpecifyDataVO>();
+        SpecifyDataVO specifyDataVO = new SpecifyDataVO();
+        specifyDataVO.setAge(11);
+        specifyDataVO.setUserName("sehoon");
+
+        genericVO.setTgrmDtdvValu(specifyDataVO);
+
+        log.info(genericVO.getTgrmDtdvValu().getUserName());
+
+        log.info(word);
         return word;
     }
 
