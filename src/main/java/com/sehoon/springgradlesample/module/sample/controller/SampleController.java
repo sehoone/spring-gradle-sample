@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sehoon.springgradlesample.common.mci.util.DpMciUtil;
-import com.sehoon.springgradlesample.common.vo.CmciVO;
-import com.sehoon.springgradlesample.common.vo.GenericVO;
+import com.sehoon.springgradlesample.common.vo.SAMPLE00001IVO;
+import com.sehoon.springgradlesample.common.vo.SAMPLE00001OVO;
 import com.sehoon.springgradlesample.common.vo.SpecifyDataVO;
 import com.sehoon.springgradlesample.config.ApplicationProperties;
 
@@ -39,20 +39,17 @@ public class SampleController {
     @GetMapping("/hello-world2")
     public String helloWorld2() throws Exception {
         String word = applicationProperties.getCustomVal();
-        // CmciVO testVO = new CmciVO();
 
-        // DpMciUtil.mciCallSerivce(testVO, "ee");
+        SAMPLE00001IVO inVo = new SAMPLE00001IVO();
 
-        GenericVO<SpecifyDataVO> genericVO = new GenericVO<SpecifyDataVO>();
         SpecifyDataVO specifyDataVO = new SpecifyDataVO();
-        specifyDataVO.setAge(11);
-        specifyDataVO.setUserName("sehoon");
+        specifyDataVO.setCno("12389120");
+        inVo.setTgrmDtdvValu(specifyDataVO);
 
-        genericVO.setTgrmDtdvValu(specifyDataVO);
+        SAMPLE00001OVO outVo = DpMciUtil.mciCallSerivce(inVo, SAMPLE00001OVO.class, "SAMPLE00001", "ONCSC1340", "R");
 
-        log.info(genericVO.getTgrmDtdvValu().getUserName());
+        log.info(outVo.toString());
 
-        log.info(word);
         return word;
     }
 

@@ -1,14 +1,15 @@
-package com.sehoon.springgradlesample.common.vo;
+package com.sehoon.springgradlesample.common.mci.vo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class MciRequestVO{
-    private MciHeaderVO tgrmCmnnhddvValu;
-
-    private Object tgrmDtdvValu;
+public class MciCommMsgDataVo{
+    private String msgCd;
+    private String msgPrnAttrCd;
+    private String msgCt;
+    private String anxMsgCt;
 }
 
 // CDPNCSO00016IVo inVo = new CDPNCSO00016IVo();

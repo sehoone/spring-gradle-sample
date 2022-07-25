@@ -1,17 +1,17 @@
 package com.sehoon.springgradlesample.common.vo;
 
+import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVo;
 import com.sehoon.springgradlesample.common.mci.vo.MciCommMsgVO;
-import com.sehoon.springgradlesample.common.mci.vo.MciHeaderVO;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class GenericVO<T>{
-    private MciHeaderVO tgrmCmnnhddvValu;
+public class SAMPLE00001OVO{
+    private MciCommHeaderVo tgrmCmnnhddvValu;
 
     private MciCommMsgVO tgrmMsdvValu;
 
-    private T tgrmDtdvValu;
+    private SpecifyDataVO tgrmDtdvValu;
 }

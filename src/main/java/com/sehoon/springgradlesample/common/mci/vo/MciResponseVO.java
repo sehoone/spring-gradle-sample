@@ -1,4 +1,4 @@
-package com.sehoon.springgradlesample.common.vo;
+package com.sehoon.springgradlesample.common.mci.vo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 public class MciResponseVO{
     private MciHeaderVO tgrmCmnnhddvValu;
 
-    private MciMsgVO tgrmMsdvValu;
+    private MciCommMsgVO tgrmMsdvValu;
 
     private Object tgrmDtdvValu;
 }

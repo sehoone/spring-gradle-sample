@@ -1,4 +1,4 @@
-package com.sehoon.springgradlesample.common.vo;
+package com.sehoon.springgradlesample.common.mci.vo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
