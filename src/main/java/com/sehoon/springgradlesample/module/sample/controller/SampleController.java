@@ -1,10 +1,22 @@
 package com.sehoon.springgradlesample.module.sample.controller;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.Properties;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.yaml.snakeyaml.Yaml;
 
+import com.sehoon.springgradlesample.common.mci.manager.MciPropManager;
 import com.sehoon.springgradlesample.common.mci.util.DpMciUtil;
 import com.sehoon.springgradlesample.common.vo.SAMPLE00001IVO;
 import com.sehoon.springgradlesample.common.vo.SAMPLE00001OVO;
@@ -23,14 +35,16 @@ public class SampleController {
 
     @Autowired
     private ApplicationProperties applicationProperties;
+
     /**
      * {@code GET /api/sample/hello-world} : get hello-world text
      *
      * @param 
      * @return 
+     * @throws IOException
      */
     @GetMapping("/hello-world")
-    public String helloWorld() {
+    public String helloWorld() throws IOException {
         String word = "hello-world!!";
         log.debug(word);
         return word;
@@ -52,5 +66,4 @@ public class SampleController {
 
         return word;
     }
-
 }

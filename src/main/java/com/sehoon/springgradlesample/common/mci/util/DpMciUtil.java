@@ -44,7 +44,7 @@ public class DpMciUtil {
 					디지털보험(모바일웹)	DI2
 					디지털플랫폼앱		DA0
 		*/
-		String appliDtptDutjCd = "";
+		String appliDtptDutjCd = CcFwUtil.getMciProp("mci.appliDtptDutjCd");
 		tgrmCmnnhddvValu.setAppliDtptDutjCd(appliDtptDutjCd);
 		if (StringUtils.isEmpty(tgrmCmnnhddvValu.getUserId())) {
 			tgrmCmnnhddvValu.setUserId("99999999");		// 신한생명

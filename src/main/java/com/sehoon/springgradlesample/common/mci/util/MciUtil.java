@@ -8,7 +8,11 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.sehoon.springgradlesample.common.mci.constant.MciChannelConst;
 import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVo;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class MciUtil {
+
 		/**
 	 * MCI채널에 전문 송신하고 응답받기(NL용) 공통함수
 	 * @throws Exception
@@ -32,11 +36,13 @@ public class MciUtil {
 	}
 
 	private static <T> T sendJSON(MciChannelConst channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
+		// TODO 서비스 채널별로 MCI URL 셋팅
 		// String chUrl = CcFwUtil.getElProp("MCI_PROP", channel.name()+"_BASE_URL");
-		String chUrl = "https://36c7930b-1c7c-4439-bf1d-19900de483fa.mock.pstmn.io/mci";
+		String chUrl = CcFwUtil.getMciProp("mci.url");
+		log.info("mciUrl " + chUrl);
 
 		// 공통헤더 디폴트 값 셋팅
-				// 공통헤더 얻기
+		// 공통헤더 얻기
 		MciCommHeaderVo tgrmCmnnhddvValu = _invokeGetter(inVo,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
 				
 		// validation
@@ -155,11 +161,7 @@ public class MciUtil {
 
 	private static String s_nlGlbId = null;
 	static synchronized String _nextNlGlbId(String appliDutjCd) throws Exception {
-	    // String hostname = CommUtil.getHostName();	
-    	// if (hostname == null || hostname.length() < 1) {
-    	// 	hostname = "localhost";
-    	// }
-		String hostname = "localhost";
+		String hostname = StringUtils.defaultString(CcFwUtil.getMciProp("hostname"), "");
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(CcFwUtil.getCurrentDate("yyyyMMddHHmmssSSS"));	// 17
