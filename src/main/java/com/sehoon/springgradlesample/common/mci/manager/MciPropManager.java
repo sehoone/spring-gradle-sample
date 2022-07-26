@@ -32,7 +32,8 @@ public class MciPropManager {
 		Yaml y = new Yaml();
 		InputStream resource = null;
 		try {
-			resource = new ClassPathResource("properties/mciprop.yml").getInputStream();
+			String mciPropPath = "properties/mciprop-" + currentActiveProfiles() + ".yml";
+			resource = new ClassPathResource(mciPropPath).getInputStream();
 		} catch (IOException e) {
 		}
 		if(resource == null){
@@ -70,6 +71,14 @@ public class MciPropManager {
         )));
     }
 
+	private String currentActiveProfiles() {
+		String activeProfile = System.getProperty("spring.profiles.active");
+		if (StringUtils.isBlank(activeProfile)) {
+			activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
+		}
+		return activeProfile;
+	}
+	
 	public String getProp(String key){
 		return mciPropMap.get(key);
 	}

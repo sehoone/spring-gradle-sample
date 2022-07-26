@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -172,4 +173,67 @@ public class CcFwUtil {
 	public static String getMciProp(String key){
 		return MciPropManager.getInstance().getProp(key);
 	}
+
+	public static byte[] strToSpBytes(String str, int len) throws UnsupportedEncodingException {
+		return strToSpBytes(str, len, "UTF-8");
+	}
+
+	public static byte[] strToSpBytes(String str, int len, String encode) throws UnsupportedEncodingException {
+		if (len < 1)
+			return null;
+		byte[] bytes = new byte[len];
+		if (str == null) {
+			for (int j = 0; j < len; j++)
+				bytes[j] = 32;
+			return bytes;
+		}
+		byte[] strBytes = null;
+
+		if (encode != null && !"null".equalsIgnoreCase(encode) && !"".equalsIgnoreCase(encode)) {
+			strBytes = str.getBytes(encode);
+		} else {
+			strBytes = str.getBytes();
+		}
+
+		int strLen = strBytes.length;
+		if (strLen > len)
+			strLen = len;
+		System.arraycopy(strBytes, 0, bytes, 0, strLen);
+		for (int i = strLen; i < len; i++)
+			bytes[i] = 32;
+		return bytes;
+	}
+
+	public static String getTrimmedString(byte[] buf, int offset, int length, String encode) throws Exception {
+		byte[] bb = new byte[length];
+		try {
+		  System.arraycopy(buf, offset, bb, 0, length);
+		  if (encode != null && !"null".equalsIgnoreCase(encode) && !"".equalsIgnoreCase(encode))
+			return (new String(bb, encode)).trim(); 
+		  return (new String(bb)).trim();
+		} catch (Exception e) {
+		  log.error("ERROR TypeConversionUtil", e);
+		  throw new Exception("ERROR.SYS.010", e);
+		} 
+	  }
+	  
+	  public static byte[] bytesToByte(byte[] buf, int offset, int length) {
+		byte[] bb = new byte[length];
+		System.arraycopy(buf, offset, bb, 0, length);
+		return bb;
+	  }
+	  
+	  public static String getTrimmedString(byte[] buf, int offset, int length) throws Exception {
+		return getTrimmedString(buf, offset, length, "UTF-8");
+	  }
+	  
+	  public static int bytesToInt(byte[] buf, int offset, int length, String encode) throws Exception {
+		String str = getTrimmedString(buf, offset, length, encode);
+		return parseToInt(str);
+	  }
+	  
+	  public static int bytesToInt(byte[] buf, int offset, int length) throws Exception {
+		String str = getTrimmedString(buf, offset, length, "UTF-8");
+		return parseToInt(str);
+	  }
 }

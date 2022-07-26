@@ -46,7 +46,12 @@ public class SampleController {
     @GetMapping("/hello-world")
     public String helloWorld() throws IOException {
         String word = "hello-world!!";
-        log.debug(word);
+        String activeProfile = System.getProperty("spring.profiles.active");
+		if (StringUtils.isBlank(activeProfile)) {
+			activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
+		}
+        log.info(activeProfile);
+        log.info(applicationProperties.getMciUrl());
         return word;
     }
 

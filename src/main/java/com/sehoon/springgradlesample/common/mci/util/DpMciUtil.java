@@ -28,7 +28,16 @@ public class DpMciUtil {
 		Method getHeaderVo = inVo.getClass().getMethod("getTgrmCmnnhddvValu", new Class[0]);
 		MciCommHeaderVo getHeader = (MciCommHeaderVo) getHeaderVo.invoke(inVo, new Object[0]);
 		CcFwUtil.mergeVo(tgrmCmnnhddvValu, getHeader);
-	
+		
+		makeMciHeader(tgrmCmnnhddvValu, itrfId, rcvSvcId, inqrTraTypeCd, strYmd);
+
+		Method toMethod = inVo.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVo.class);
+		toMethod.invoke(inVo, tgrmCmnnhddvValu);
+		
+		return MciUtil.send(MciChannelConst.CHANNAL_A, inVo, outClass);
+	}
+
+	private static void makeMciHeader(MciCommHeaderVo tgrmCmnnhddvValu, String itrfId, String rcvSvcId, String inqrTraTypeCd, String strYmd){
 		// 헤더필수값 설정 후 inVo에 입력
 		tgrmCmnnhddvValu.setItrfId(itrfId);
 		tgrmCmnnhddvValu.setRcvSvcId(rcvSvcId);
@@ -44,7 +53,7 @@ public class DpMciUtil {
 					디지털보험(모바일웹)	DI2
 					디지털플랫폼앱		DA0
 		*/
-		String appliDtptDutjCd = CcFwUtil.getMciProp("mci.appliDtptDutjCd");
+		String appliDtptDutjCd = CcFwUtil.getMciProp("mci.appli-dtpt-dutj-cd");
 		tgrmCmnnhddvValu.setAppliDtptDutjCd(appliDtptDutjCd);
 		if (StringUtils.isEmpty(tgrmCmnnhddvValu.getUserId())) {
 			tgrmCmnnhddvValu.setUserId("99999999");		// 신한생명
@@ -85,12 +94,8 @@ public class DpMciUtil {
 				tgrmCmnnhddvValu.setDrtmCd("0995500");	// 조직
 				tgrmCmnnhddvValu.setUserId("99999997");	// 인사 > 신한생명
 				tgrmCmnnhddvValu.setAcntOgnzNo("0995500");
-			}			
+			}		
 		}
 
-		Method toMethod = inVo.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVo.class);
-		toMethod.invoke(inVo, tgrmCmnnhddvValu);
-		
-		return MciUtil.send(MciChannelConst.CHANNAL_A, inVo, outClass);
 	}
 }

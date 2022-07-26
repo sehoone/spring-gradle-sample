@@ -14,5 +14,8 @@ import lombok.Data;
 public class ApplicationProperties {
 
     private String customVal;
+    private String mciUrl;
+    private String mciAppliDtptDutjCd;
+    private String mciHostname;
 }
 
