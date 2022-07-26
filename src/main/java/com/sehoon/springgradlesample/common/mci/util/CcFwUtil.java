@@ -108,12 +108,12 @@ public class CcFwUtil {
 		Method[] arrayOfMethod1;
 		for (i = (arrayOfMethod1 = methods).length, b = 0; b < i; ) {
 		  Method fromMethod = arrayOfMethod1[b];
-		  if (fromMethod.getDeclaringClass().equals(obj.getClass()) && fromMethod.getName().startsWith("get") && !"getOffset".equals(fromMethod.getName())) {
+		  if (fromMethod.getDeclaringClass().equals(obj.getClass()) && fromMethod.getName().startsWith("get")) {
 			String fromName = fromMethod.getName();
 			String toName = fromName.replaceFirst("get", "set");
 			try {
 			  Method toMetod = obj.getClass().getMethod(toName, new Class[] { fromMethod.getReturnType() });
-			  Object value = fromMethod.invoke(update, null);
+			  Object value = fromMethod.invoke(update);
 			  if (value != null)
 				toMetod.invoke(obj, new Object[] { value }); 
 			} catch (NoSuchMethodException noSuchMethodException) {

@@ -113,16 +113,17 @@ public class MciUtil {
 			try {
 				  outData = CcFwUtil.fromJsonString(bbStr, outClass);
 			} catch(JsonParseException ee) {
-				throw new JsonParseException("응답형식이 json이 아님", null);
+				throw new JsonParseException(null, "응답형식이 json이 아님");
 			}
 
-			Exception ue = null;
+			// Exception ue = null;
 			try {
 				// 공통헤더 얻기
 				MciCommHeaderVo outHeader = _invokeGetter(outData,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
 				
 				if (!"0".equals(outHeader.getTgrmDalRsltCd())) {
-					ue = new Exception("오류수신:"+outHeader.getTgrmDalRsltCd());
+					// ue = new Exception("오류수신:"+outHeader.getTgrmDalRsltCd());
+					throw new Exception("오류수신:"+outHeader.getTgrmDalRsltCd());
 				} 
 			} catch(NullPointerException ee) {
 			} catch(Exception ee) {
@@ -138,6 +139,7 @@ public class MciUtil {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static <T> T _invokeGetter(Object inVo, String getMethod, Class<T> outClass) throws Exception {
 		Exception re1 = null;
 		T outVo = null;

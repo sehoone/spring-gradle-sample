@@ -45,6 +45,7 @@ public class MciPropManager {
 	}
 
 	// yaml to properties format assign
+	@SuppressWarnings("unchecked")
     private void assignProperties(Properties props, Map<String, Object> map, String path) {
         for (Entry<String, Object> entry : map.entrySet()) {
             String key = entry.getKey();
