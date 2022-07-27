@@ -1,7 +1,12 @@
 
 hostname: health
 mci:
-  url: https://36c7930b-1c7c-4439-bf1d-19900de483fa.mock.pstmn.io/mci
   appli-dtpt-dutj-cd: HW1
   envr-type-cd: D
 
+mci-outer-type: HFLD
+#mci-outer-type: JSON
+mci-outer-base-url: http://localhost:3000/api/mci
+mci-outer-frbu-cd: CD
+mci-outer-cmou-dutj-cd: AB
+mci-outer-encode: UTF-8

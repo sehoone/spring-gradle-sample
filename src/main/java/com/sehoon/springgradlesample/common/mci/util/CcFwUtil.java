@@ -39,6 +39,7 @@ public class CcFwUtil {
 	}
 
     public static byte[] sendPostUrl(String stUrl, byte[] postData,int timeoutMs) throws Exception {
+		log.info("length " + Integer.toString(postData.length));
 		HttpURLConnection conn = null;
 		OutputStream out = null;
 		InputStream is = null;
@@ -46,6 +47,7 @@ public class CcFwUtil {
 		int readCount = 0;
 		byte[] rtnArray = null;
 		byte[] buff = new byte[1024];
+
 		try
 		{
 	
@@ -236,4 +238,6 @@ public class CcFwUtil {
 		String str = getTrimmedString(buf, offset, length, "UTF-8");
 		return parseToInt(str);
 	  }
+
+	  
 }

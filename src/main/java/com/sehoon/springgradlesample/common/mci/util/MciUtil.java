@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.sehoon.springgradlesample.common.mci.constant.MciChannelConst;
 import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVo;
+import com.sehoon.springgradlesample.common.mci.vo.MciCommMsgDataVo;
+import com.sehoon.springgradlesample.common.mci.vo.MciCommMsgHdrVo;
 import com.sehoon.springgradlesample.common.mci.vo.MciHfldMsgVO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +26,7 @@ public class MciUtil {
 
 	public static <T> T send(MciChannelConst channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
 		// 채널별로 연동 타입이 있음
-		String chType = "JSON";
+		String chType = CcFwUtil.getMciProp(channel.getValue()+"-type");
 
 		switch(chType) {
 			case "JSON":	// 대내 MCI용 JSON 방식
@@ -38,7 +40,7 @@ public class MciUtil {
 
 	private static <T> T sendJSON(MciChannelConst channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
 		// String chUrl = CcFwUtil.getElProp("MCI_PROP", channel.name()+"_BASE_URL");
-		String chUrl = CcFwUtil.getMciProp("mci.url");
+		String chUrl = CcFwUtil.getMciProp(channel.getValue() + "-base-url");
 		log.info("mciUrl " + chUrl);
 
 		// 공통헤더 디폴트 값 셋팅
@@ -133,18 +135,18 @@ public class MciUtil {
 		// tgrmMsdvValu		MciCmouMsgVo
 		// 이하 데이터컬럼들 또는 대내MCI Vo와 동일한 구조로 tgrmDtdvValu에 해당하는 Vo에 데이터컬럼들을 넣어야 함(FLD여부는 Y여야함)
 
-		String chUrl = CcFwUtil.getMciProp("mci.url");
+		String chUrl = CcFwUtil.getMciProp(channel.getValue() + "-base-url");
 		
 		// 대외 MCI 전용 파라메터 추가
-		String frbuCd = CcFwUtil.getMciProp(channel.name()+"-frbu-cd");		// 대외기관코드
-		String cmouDutjCd = CcFwUtil.getMciProp(channel.name()+"-cmou-dutj-cd");	// 대외업무코드
-		String chEnc = CcFwUtil.getMciProp(channel.name()+"-encode");	// FLD 인코딩 - 디폴트는 EUC-KR
+		String frbuCd = CcFwUtil.getMciProp(channel.getValue()+"-frbu-cd");		// 대외기관코드
+		String cmouDutjCd = CcFwUtil.getMciProp(channel.getValue()+"-cmou-dutj-cd");	// 대외업무코드
+		String chEnc = CcFwUtil.getMciProp(channel.getValue()+"-encode");	// FLD 인코딩 - 디폴트는 EUC-KR
 
 		if (frbuCd.length() < 1) {
-			throw new Exception("대외 MCI 프로퍼티의 대외기관코드("+channel.name()+"_FRBU_CD)는 반드시 설정되어있어야 합니다.");
+			throw new Exception("대외 MCI 프로퍼티의 대외기관코드("+channel.getValue()+"_FRBU_CD)는 반드시 설정되어있어야 합니다.");
 		}
 		if (cmouDutjCd.length() < 1) {
-			throw new Exception("대외 MCI 프로퍼티의 대외업무코드("+channel.name()+"_CMOU_DUTJ_CD)는 반드시 설정되어있어야 합니다.");
+			throw new Exception("대외 MCI 프로퍼티의 대외업무코드("+channel.getValue()+"_CMOU_DUTJ_CD)는 반드시 설정되어있어야 합니다.");
 		}
 
 		// inVo/outVo 모두 FLD여부 Y 여야 하며 컬럼 구조는 다음과 같아야 함
@@ -205,11 +207,28 @@ public class MciUtil {
 		tgrmCmnnhddvValu.setCmouDutjCd(cmouDutjCd);
 		
 		// 공통메시지 얻기
-		MciHfldMsgVO tgrmMsdvValu = _invokeGetter(inVo,"getTgrmMsdvValu", MciHfldMsgVO.class);
+		// MciHfldMsgVO tgrmMsdvValu = _invokeGetter(inVo,"getTgrmMsdvValu", MciHfldMsgVO.class);
+		// if(tgrmMsdvValu == null){
+		// 	MciHfldMsgVO mciHfldMsgVO = new MciHfldMsgVO();
+		// 	MciCommMsgHdrVo msgHddvValu = new MciCommMsgHdrVo();
+		// 	msgHddvValu.setMsgRpttCc("1");	// 건수 1로
+		// 	tgrmMsdvValu.setMsgHddvValu(msgHddvValu);
+		// }
+		MciHfldMsgVO tgrmMsdvValu = new MciHfldMsgVO();
+		
+		Method getHeaderVo = inVo.getClass().getMethod("getTgrmMsdvValu", new Class[0]);
+		MciHfldMsgVO getMsgHeader = (MciHfldMsgVO) getHeaderVo.invoke(inVo, new Object[0]);
+		CcFwUtil.mergeVo(tgrmMsdvValu, getMsgHeader);
 
-		// validation
-		if (tgrmMsdvValu == null) throw new Exception("대외 MCI전문 공통메시지 설정안됨");
-		tgrmMsdvValu.getMsgHddvValu().setMsgRpttCc(1);	// 건수 1로
+		if(tgrmMsdvValu.getMsgHddvValu() == null){
+			MciCommMsgHdrVo mciCommMsgHdrVo = new MciCommMsgHdrVo();
+			mciCommMsgHdrVo.setMsgRpttCc("1");
+			tgrmMsdvValu.setMsgHddvValu(mciCommMsgHdrVo);
+			tgrmMsdvValu.setMsgDtdvValu(new MciCommMsgDataVo()); 
+		}
+
+		Method toMethod = inVo.getClass().getMethod("setTgrmMsdvValu", MciHfldMsgVO.class);
+		toMethod.invoke(inVo, tgrmMsdvValu);
 		
 		// 요청파라메터로 변경
 	    byte[] inVoBytes = null;
@@ -217,12 +236,14 @@ public class MciUtil {
 		Method marshalMethod = inVo.getClass().getMethod("marshalFld", String.class );
 		inVoBytes = (byte[])marshalMethod.invoke(inVo, chEnc);
 		
+		log.info("inVoBytes " + new String(inVoBytes));
 	    // https로 서비스 호출
 		try {
-			byte[] bb = CcFwUtil.sendPostUrl(chUrl, inVoBytes, timeoutMs);
-			
+			// byte[] bb = CcFwUtil.sendPostUrl(chUrl, inVoBytes, timeoutMs);
+			byte[] bb = inVoBytes;
 			// 응답객체 얻기
 			T outData = outClass.getDeclaredConstructor().newInstance();
+			log.info("outData " + new String(bb) + " length " + new String(bb).length());
 			Exception ve = null;
 			try {
 				Method unmarshalMethod = outData.getClass().getMethod("unMarshalFld", byte[].class, String.class );
@@ -232,12 +253,11 @@ public class MciUtil {
 			} catch(Exception ee) {
 				ve = ee;
 			}
-			if (ve != null) {
-				// 공통메시지 까지는 수신한 경우 에러처리 안함(에러응답시 본문은 안오는 상태일 수 있음)
-				MciHfldMsgVO oMsgHdr = _invokeGetter(outData,"getTgrmMsdvValu", MciHfldMsgVO.class);
-				if (oMsgHdr.getOffset() == 0) {
-					throw ve;
-				}
+			
+			// 공통메시지 까지는 수신한 경우 에러처리 안함(에러응답시 본문은 안오는 상태일 수 있음)
+			MciHfldMsgVO oMsgHdr = _invokeGetter(outData,"getTgrmMsdvValu", MciHfldMsgVO.class);
+			if (oMsgHdr.getOffset() == 0) {
+				throw ve;
 			}
 
 			try {
@@ -305,4 +325,5 @@ public class MciUtil {
 		
 		return next;
 	}
+	
 }

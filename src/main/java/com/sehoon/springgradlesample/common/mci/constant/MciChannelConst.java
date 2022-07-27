@@ -1,8 +1,8 @@
 package com.sehoon.springgradlesample.common.mci.constant;
 
 public enum MciChannelConst {
-    CHANNAL_A("A"),
-    CHANNAL_B("B");
+    NL_CDP("nl-cdp"),
+    MCI_OUTER("mci-outer");
     
     private final String value;
 

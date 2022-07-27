@@ -33,8 +33,10 @@ public class DpMciUtil {
 
 		Method toMethod = inVo.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVo.class);
 		toMethod.invoke(inVo, tgrmCmnnhddvValu);
+
 		
-		return MciUtil.send(MciChannelConst.CHANNAL_A, inVo, outClass);
+		
+		return MciUtil.send(MciChannelConst.MCI_OUTER, inVo, outClass);
 	}
 
 	private static void makeMciHeader(MciCommHeaderVo tgrmCmnnhddvValu, String itrfId, String rcvSvcId, String inqrTraTypeCd, String strYmd){

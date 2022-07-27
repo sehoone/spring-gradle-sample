@@ -1,13 +1,64 @@
 package com.sehoon.springgradlesample.common.mci.vo;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
+import com.sehoon.springgradlesample.common.mci.util.CcFwUtil;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Data
 @EqualsAndHashCode(callSuper=false)
 public class MciCommMsgDataVo{
+    private int _offset;
+
+    public MciCommMsgDataVo(){
+        this._offset = 0;
+    }
+
+    public MciCommMsgDataVo(int iOffset){
+        this._offset = iOffset;
+    }
+
     private String msgCd;
     private String msgPrnAttrCd;
     private String msgCt;
     private String anxMsgCt;
+
+    public byte[] marshalFld(){
+        return marshalFld( "UTF-8" ); 
+    }
+
+	public byte[] marshalFld(String encode){
+        try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(bout);) {
+            out.write( CcFwUtil.strToSpBytes(this.msgCd , 8, encode ) );
+            out.write( CcFwUtil.strToSpBytes(this.msgPrnAttrCd , 1, encode ) );
+            out.write( CcFwUtil.strToSpBytes(this.msgCt , 200, encode ) );
+            out.write( CcFwUtil.strToSpBytes(this.anxMsgCt , 200, encode ) );
+            return bout.toByteArray();
+        } catch (IOException e) {
+            log.error("marshalFld Error:["+ toString()+"]", e);
+        }
+        return null;
+    }
+
+    public void unMarshalFld( byte[] bytes ) throws Exception{
+        unMarshalFld( bytes, "UTF-8" ); 
+    }
+
+    public void unMarshalFld(byte[] bytes, String encode) throws Exception {
+        this.msgCd = CcFwUtil.getTrimmedString(bytes, _offset, 8, encode);
+        _offset += 8;
+        this.msgPrnAttrCd = CcFwUtil.getTrimmedString(bytes, _offset, 1, encode);
+        _offset += 1;
+        this.msgCt = CcFwUtil.getTrimmedString(bytes, _offset, 200, encode);
+        _offset += 200;
+        this.anxMsgCt = CcFwUtil.getTrimmedString(bytes, _offset, 200, encode);
+        _offset += 200;
+    }
 }

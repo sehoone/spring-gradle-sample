@@ -1,10 +1,12 @@
-package com.sehoon.springgradlesample.common.mci.vo;
+package com.sehoon.springgradlesample.common.vo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.sehoon.springgradlesample.common.mci.util.CcFwUtil;
+import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVo;
+import com.sehoon.springgradlesample.common.mci.vo.MciHfldMsgVO;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,20 +15,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class MciCommMsgHdrVo{
+public class SAMPLE00002IVO{
     private int _offset;
 
-    public MciCommMsgHdrVo(){
+    public SAMPLE00002IVO(){
         this._offset = 0;
     }
 
-    public MciCommMsgHdrVo(int iOffset){
+    public SAMPLE00002IVO(int iOffset){
         this._offset = iOffset;
     }
 
-    private String msgTnsmTypeCd;
-    private String msdvLencn;
-    private String msgRpttCc;
+    private MciCommHeaderVo tgrmCmnnhddvValu;
+    private MciHfldMsgVO tgrmMsdvValu;
+    private SpecifyDataVO tgrmDtdvValu;
 
     public byte[] marshalFld(){
         return marshalFld( "UTF-8" ); 
@@ -35,9 +37,10 @@ public class MciCommMsgHdrVo{
 	public byte[] marshalFld(String encode){
         try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(bout);) {
-            out.write( CcFwUtil.strToSpBytes(this.msgTnsmTypeCd , 1, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.msdvLencn , 8, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.msgRpttCc , 2, encode ) );
+            out.write( this.tgrmCmnnhddvValu.marshalFld() );
+            out.write( this.tgrmMsdvValu.marshalFld() );
+            out.write( this.tgrmDtdvValu.marshalFld() );
+            
             return bout.toByteArray();
         } catch (IOException e) {
             log.error("marshalFld Error:["+ toString()+"]", e);
@@ -50,11 +53,12 @@ public class MciCommMsgHdrVo{
     }
 
     public void unMarshalFld(byte[] bytes, String encode) throws Exception {
-        this.msgTnsmTypeCd = CcFwUtil.getTrimmedString(bytes, _offset, 8, encode);
-        _offset += 8;
-        this.msdvLencn = CcFwUtil.getTrimmedString(bytes, _offset, 1, encode);
-        _offset += 1;
-        this.msgRpttCc = CcFwUtil.getTrimmedString(bytes, _offset, 2, encode);
-        _offset += 2;
+        this.tgrmCmnnhddvValu.unMarshalFld(CcFwUtil.bytesToByte(bytes, _offset, 800));
+        _offset += 800;
+        this.tgrmMsdvValu = new MciHfldMsgVO();
+        this.tgrmMsdvValu.unMarshalFld(CcFwUtil.bytesToByte(bytes, _offset, 420));
+        _offset += 420;
+        this.tgrmDtdvValu.unMarshalFld(CcFwUtil.bytesToByte(bytes, _offset, 73));
+        _offset += 73;
     }
 }
