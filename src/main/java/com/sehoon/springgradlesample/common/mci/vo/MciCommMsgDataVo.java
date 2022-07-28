@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.sehoon.springgradlesample.common.mci.util.CcFwUtil;
+import com.sehoon.springgradlesample.common.mci.util.MciUtil;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,10 +36,10 @@ public class MciCommMsgDataVo{
 	public byte[] marshalFld(String encode){
         try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(bout);) {
-            out.write( CcFwUtil.strToSpBytes(this.msgCd , 8, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.msgPrnAttrCd , 1, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.msgCt , 200, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.anxMsgCt , 200, encode ) );
+            out.write( MciUtil.strToSpBytes(this.msgCd , 8, encode ) );
+            out.write( MciUtil.strToSpBytes(this.msgPrnAttrCd , 1, encode ) );
+            out.write( MciUtil.strToSpBytes(this.msgCt , 200, encode ) );
+            out.write( MciUtil.strToSpBytes(this.anxMsgCt , 200, encode ) );
             return bout.toByteArray();
         } catch (IOException e) {
             log.error("marshalFld Error:["+ toString()+"]", e);
@@ -52,13 +52,13 @@ public class MciCommMsgDataVo{
     }
 
     public void unMarshalFld(byte[] bytes, String encode) throws Exception {
-        this.msgCd = CcFwUtil.getTrimmedString(bytes, _offset, 8, encode);
+        this.msgCd = MciUtil.getTrimmedString(bytes, _offset, 8, encode);
         _offset += 8;
-        this.msgPrnAttrCd = CcFwUtil.getTrimmedString(bytes, _offset, 1, encode);
+        this.msgPrnAttrCd = MciUtil.getTrimmedString(bytes, _offset, 1, encode);
         _offset += 1;
-        this.msgCt = CcFwUtil.getTrimmedString(bytes, _offset, 200, encode);
+        this.msgCt = MciUtil.getTrimmedString(bytes, _offset, 200, encode);
         _offset += 200;
-        this.anxMsgCt = CcFwUtil.getTrimmedString(bytes, _offset, 200, encode);
+        this.anxMsgCt = MciUtil.getTrimmedString(bytes, _offset, 200, encode);
         _offset += 200;
     }
 }

@@ -10,33 +10,36 @@ import org.springframework.util.Assert;
 import com.sehoon.springgradlesample.common.mci.constant.MciChannelConst;
 import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVo;
 
-public class DpMciUtil {
+public class DpMciClientUtil {
 	public static <T> T mciCallSerivce(Object inVo, Class<T> outClass, String itrfId, String rcvSvcId, String inqrTraTypeCd) throws Exception {
         // 필수값 체크
 		Assert.hasText(itrfId, "인터페이스ID is empty");
 		Assert.hasText(rcvSvcId, "서비스ID is empty");
 		Assert.hasText(inqrTraTypeCd, "조회거래유형코드 is empty");
 
-        return send(inVo,outClass,itrfId,rcvSvcId,inqrTraTypeCd,CcFwUtil.getCurrentDate("yyyyMMdd"));
+        return send(inVo,outClass,itrfId,rcvSvcId,inqrTraTypeCd,MciUtil.getCurrentDate("yyyyMMdd"));
 	}
 
     private static <T> T send(Object inVo, Class<T> outClass, String itrfId, String rcvSvcId, String inqrTraTypeCd, String strYmd) throws Exception {
 	
-		// 헤더 vo 비즈니스별 셋팅
+		// set 헤더 vo 비즈니스
 		MciCommHeaderVo tgrmCmnnhddvValu = new MciCommHeaderVo();
-		
 		Method getHeaderVo = inVo.getClass().getMethod("getTgrmCmnnhddvValu", new Class[0]);
 		MciCommHeaderVo getHeader = (MciCommHeaderVo) getHeaderVo.invoke(inVo, new Object[0]);
-		CcFwUtil.mergeVo(tgrmCmnnhddvValu, getHeader);
+		MciUtil.mergeVo(tgrmCmnnhddvValu, getHeader);
 		
 		makeMciHeader(tgrmCmnnhddvValu, itrfId, rcvSvcId, inqrTraTypeCd, strYmd);
 
 		Method toMethod = inVo.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVo.class);
 		toMethod.invoke(inVo, tgrmCmnnhddvValu);
 
-		
-		
-		return MciUtil.send(MciChannelConst.MCI_OUTER, inVo, outClass);
+		// set 수신 채널
+		MciChannelConst channel = MciChannelConst.MCI_INNER;
+		if(rcvSvcId.indexOf("ONRIA") >= 0 ) {
+        	channel = MciChannelConst.MCI_OUTER;
+        }
+
+		return MciClientUtil.send(channel, inVo, outClass);
 	}
 
 	private static void makeMciHeader(MciCommHeaderVo tgrmCmnnhddvValu, String itrfId, String rcvSvcId, String inqrTraTypeCd, String strYmd){
@@ -46,23 +49,17 @@ public class DpMciUtil {
 		tgrmCmnnhddvValu.setInqrTraTypeCd(inqrTraTypeCd);		// 조회거래유형코드 등록(C), 조회(R), 변경(U), 삭제(D), 인쇄(P), 다운로드(E) 
 		tgrmCmnnhddvValu.setStrYmd(strYmd);
 	
-		// v1.05: 어플리케이션상세업무코드 - 고객채널 업무상세구분코드 3째자리 일련번호 규칙 : 앱(0), PC(1), 모바일웹(2)
-		/*			홈페이지(PC)		DH1
-					홈페이지(모바일웹)	DH2
-					디지털창구(PC)		DA1
-					디지털창구(모바일웹)	DA2
-					디지털보험(PC)		DI1
-					디지털보험(모바일웹)	DI2
-					디지털플랫폼앱		DA0
+		// 어플리케이션상세업무코드 - 고객채널 업무상세구분코드 3째자리 일련번호 규칙 : 앱(0), PC(1), 모바일웹(2)
+		/*	홈페이지(PC) DH1, 홈페이지(모바일웹) DH2, 디지털창구(PC) DA1, 디지털창구(모바일웹) DA2, 디지털보험(PC) DI1
+			디지털보험(모바일웹) DI2, 디지털플랫폼앱 DA0
 		*/
-		String appliDtptDutjCd = CcFwUtil.getMciProp("mci.appli-dtpt-dutj-cd");
+		String appliDtptDutjCd = MciUtil.getMciProp("mci.appli-dtpt-dutj-cd");
 		tgrmCmnnhddvValu.setAppliDtptDutjCd(appliDtptDutjCd);
 		if (StringUtils.isEmpty(tgrmCmnnhddvValu.getUserId())) {
 			tgrmCmnnhddvValu.setUserId("99999999");		// 신한생명
 		}
 		
-		// 디지털창구(모바일웹) - DA2, 디지털플랫폼앱 - DA0
-		// 디지털창구(PC) - DA1	
+		// 디지털창구(모바일웹) - DA2, 디지털플랫폼앱 - DA0, 디지털창구(PC) - DA1	
 		if("DA2".equals(appliDtptDutjCd) || "DA0".equals(appliDtptDutjCd)) {
 			if (StringUtils.isEmpty(tgrmCmnnhddvValu.getDrtmCd())) {
 				tgrmCmnnhddvValu.setDrtmCd("0995145");		// 본사-스마트창구

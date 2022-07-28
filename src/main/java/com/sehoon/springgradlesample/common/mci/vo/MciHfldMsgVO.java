@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.sehoon.springgradlesample.common.mci.util.CcFwUtil;
+import com.sehoon.springgradlesample.common.mci.util.MciUtil;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -55,10 +55,10 @@ public class MciHfldMsgVO{
 
     public void unMarshalFld(byte[] bytes, String encode) throws Exception {
         this.msgHddvValu = new MciCommMsgHdrVo();
-        this.msgHddvValu.unMarshalFld(CcFwUtil.bytesToByte(bytes, _offset, 11));
+        this.msgHddvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 11));
         _offset += 11;
         this.msgDtdvValu = new MciCommMsgDataVo();
-        this.msgDtdvValu.unMarshalFld(CcFwUtil.bytesToByte(bytes, _offset, 409));
+        this.msgDtdvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 409));
         _offset += 409;
     }
 }

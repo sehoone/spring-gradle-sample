@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.sehoon.springgradlesample.common.mci.util.CcFwUtil;
+import com.sehoon.springgradlesample.common.mci.util.MciUtil;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -35,9 +35,9 @@ public class MciCommMsgHdrVo{
 	public byte[] marshalFld(String encode){
         try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(bout);) {
-            out.write( CcFwUtil.strToSpBytes(this.msgTnsmTypeCd , 1, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.msdvLencn , 8, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.msgRpttCc , 2, encode ) );
+            out.write( MciUtil.strToSpBytes(this.msgTnsmTypeCd , 1, encode ) );
+            out.write( MciUtil.strToSpBytes(this.msdvLencn , 8, encode ) );
+            out.write( MciUtil.strToSpBytes(this.msgRpttCc , 2, encode ) );
             return bout.toByteArray();
         } catch (IOException e) {
             log.error("marshalFld Error:["+ toString()+"]", e);
@@ -50,11 +50,11 @@ public class MciCommMsgHdrVo{
     }
 
     public void unMarshalFld(byte[] bytes, String encode) throws Exception {
-        this.msgTnsmTypeCd = CcFwUtil.getTrimmedString(bytes, _offset, 8, encode);
+        this.msgTnsmTypeCd = MciUtil.getTrimmedString(bytes, _offset, 8, encode);
         _offset += 8;
-        this.msdvLencn = CcFwUtil.getTrimmedString(bytes, _offset, 1, encode);
+        this.msdvLencn = MciUtil.getTrimmedString(bytes, _offset, 1, encode);
         _offset += 1;
-        this.msgRpttCc = CcFwUtil.getTrimmedString(bytes, _offset, 2, encode);
+        this.msgRpttCc = MciUtil.getTrimmedString(bytes, _offset, 2, encode);
         _offset += 2;
     }
 }

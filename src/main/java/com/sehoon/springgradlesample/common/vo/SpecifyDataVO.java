@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.sehoon.springgradlesample.common.mci.util.CcFwUtil;
+import com.sehoon.springgradlesample.common.mci.util.MciUtil;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,10 +36,10 @@ public class SpecifyDataVO{
 	public byte[] marshalFld(String encode){
         try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(bout);) {
-            out.write( CcFwUtil.strToSpBytes(this.cno , 8, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.userName , 40, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.userPhone , 20, encode ) );
-            out.write( CcFwUtil.strToSpBytes(this.age , 5, encode ) );
+            out.write( MciUtil.strToSpBytes(this.cno , 8, encode ) );
+            out.write( MciUtil.strToSpBytes(this.userName , 40, encode ) );
+            out.write( MciUtil.strToSpBytes(this.userPhone , 20, encode ) );
+            out.write( MciUtil.strToSpBytes(this.age , 5, encode ) );
             
             return bout.toByteArray();
         } catch (IOException e) {
@@ -53,13 +53,13 @@ public class SpecifyDataVO{
     }
 
     public void unMarshalFld(byte[] bytes, String encode) throws Exception {
-        this.cno = CcFwUtil.getTrimmedString(bytes, _offset, 8, encode);
+        this.cno = MciUtil.getTrimmedString(bytes, _offset, 8, encode);
         _offset += 8;
-        this.userName = CcFwUtil.getTrimmedString(bytes, _offset, 40, encode);
+        this.userName = MciUtil.getTrimmedString(bytes, _offset, 40, encode);
         _offset += 40;
-        this.userPhone = CcFwUtil.getTrimmedString(bytes, _offset, 20, encode);
+        this.userPhone = MciUtil.getTrimmedString(bytes, _offset, 20, encode);
         _offset += 20;
-        this.age = CcFwUtil.getTrimmedString(bytes, _offset, 5, encode);
+        this.age = MciUtil.getTrimmedString(bytes, _offset, 5, encode);
         _offset += 5;
         
     }

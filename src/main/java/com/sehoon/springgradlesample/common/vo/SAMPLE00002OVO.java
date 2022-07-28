@@ -1,6 +1,6 @@
 package com.sehoon.springgradlesample.common.vo;
 
-import com.sehoon.springgradlesample.common.mci.util.CcFwUtil;
+import com.sehoon.springgradlesample.common.mci.util.MciUtil;
 import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVo;
 import com.sehoon.springgradlesample.common.mci.vo.MciHfldMsgVO;
 
@@ -32,13 +32,13 @@ public class SAMPLE00002OVO{
 
     public void unMarshalFld(byte[] bytes, String encode) throws Exception {
         this.tgrmCmnnhddvValu = new MciCommHeaderVo();
-        this.tgrmCmnnhddvValu.unMarshalFld(CcFwUtil.bytesToByte(bytes, _offset, 800));
+        this.tgrmCmnnhddvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 800));
         _offset += 800;
         this.tgrmMsdvValu = new MciHfldMsgVO();
-        this.tgrmMsdvValu.unMarshalFld(CcFwUtil.bytesToByte(bytes, _offset, 420));
+        this.tgrmMsdvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 420));
         _offset += 420;
         this.tgrmDtdvValu = new SpecifyDataVO();
-        this.tgrmDtdvValu.unMarshalFld(CcFwUtil.bytesToByte(bytes, _offset, 73));
+        this.tgrmDtdvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 73));
         _offset += 73;
     }
 }
