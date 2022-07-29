@@ -1,7 +1,7 @@
 package com.sehoon.springgradlesample.common.vo;
 
 import com.sehoon.springgradlesample.common.mci.util.MciUtil;
-import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVo;
+import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVO;
 import com.sehoon.springgradlesample.common.mci.vo.MciHfldMsgVO;
 
 import lombok.Data;
@@ -20,7 +20,7 @@ public class SAMPLE00002OVO{
         this._offset = iOffset;
     }
     
-    private MciCommHeaderVo tgrmCmnnhddvValu;
+    private MciCommHeaderVO tgrmCmnnhddvValu;
 
     private MciHfldMsgVO tgrmMsdvValu;
 
@@ -31,7 +31,7 @@ public class SAMPLE00002OVO{
     }
 
     public void unMarshalFld(byte[] bytes, String encode) throws Exception {
-        this.tgrmCmnnhddvValu = new MciCommHeaderVo();
+        this.tgrmCmnnhddvValu = new MciCommHeaderVO();
         this.tgrmCmnnhddvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 800));
         _offset += 800;
         this.tgrmMsdvValu = new MciHfldMsgVO();

@@ -47,13 +47,24 @@ public class MciClient {
         this.mciOuterEncode = applicationProperties.getMciOuterEncode();
     }
 
+	/**
+	 * MCI 연동
+	 * @param <T>
+	 * @param inVo
+	 * @param outClass
+	 * @param itrfId
+	 * @param rcvSvcId
+	 * @param inqrTraTypeCd
+	 * @return
+	 * @throws Exception
+	 */
     public <T> T mciCallSerivce(Object inVo, Class<T> outClass, String itrfId, String rcvSvcId, String inqrTraTypeCd) throws Exception {
         // 필수값 체크
 		Assert.hasText(itrfId, "인터페이스ID is empty");
 		Assert.hasText(rcvSvcId, "서비스ID is empty");
 		Assert.hasText(inqrTraTypeCd, "조회거래유형코드 is empty");
 
-        // set 헤더 vo 비즈니스
+        // set 헤더VO
 		MciCommHeaderVo tgrmCmnnhddvValu = new MciCommHeaderVo();
 		Method getHeaderVo = inVo.getClass().getMethod("getTgrmCmnnhddvValu", new Class[0]);
 		MciCommHeaderVo getHeader = (MciCommHeaderVo) getHeaderVo.invoke(inVo, new Object[0]);
@@ -91,57 +102,21 @@ public class MciClient {
 		}
 	}
 
+	/**
+	 * HTTP+JSON 방식 통신
+	 * @param <T>
+	 * @param channel
+	 * @param inVo
+	 * @param outClass
+	 * @param timeoutMs
+	 * @return
+	 * @throws Exception
+	 */
 	private <T> T sendJSON(MciChannelEnum channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
-		
-		// 공통헤더 디폴트 값 셋팅
-		MciCommHeaderVo tgrmCmnnhddvValu = _invokeGetter(inVo,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
-		
-		String itrfId = tgrmCmnnhddvValu.getItrfId();
-		if (itrfId == null || itrfId.length() < 1) throw new Exception("NL MCI전문 공통헤더에 인터페이스ID(itrfId) 설정안됨");
-		
-		String glbId = tgrmCmnnhddvValu.getGlbId();
-		if (glbId == null || glbId.length() < 1) {
-			String appliDutjCd = itrfId.substring(0, 3); // 어플리케이션업무코드(3)
-			tgrmCmnnhddvValu.setGlbId(_nextNlGlbId(appliDutjCd));
-			tgrmCmnnhddvValu.setAppliDutjCd(appliDutjCd);	// 어플리케이션업무코드 - 글로벌ID에 포함되어 있지만 업무팀에서 별도사용이 용이하도록 명시적으로 분리 추가
-		}
-		
-		// 어플리케이션상세업무코드 - 고객채널 업무상세구분코드 3째자리 일련번호 규칙 : 앱(0), PC(1), 모바일웹(2)
-		/*	홈페이지(PC) DH1, 홈페이지(모바일웹) DH2, 디지털창구(PC) DA1, 디지털창구(모바일웹) DA2, 디지털보험(PC) DI1
-			디지털보험(모바일웹) DI2, 디지털플랫폼앱 DA0
-		*/
-		String appliDtptDutjCd = tgrmCmnnhddvValu.getAppliDtptDutjCd();
-		if (appliDtptDutjCd == null || appliDtptDutjCd.length() < 3) {
-			throw new Exception("NL MCI전문 공통헤더의 어플리케이션상세업무코드(appliDtptDutjCd)는 필수 컬럼입니다.");
-		}
-
-		// 진행일련번호 - 글로벌ID에서 분리됨, 없으면 001 세팅
-		String pgrsSriaNo = tgrmCmnnhddvValu.getPgrsSriaNo();
-		if (pgrsSriaNo == null || pgrsSriaNo.length() < 1) {
-			tgrmCmnnhddvValu.setPgrsSriaNo("001");
-		}
-		
-		String inqrTraTypeCd = tgrmCmnnhddvValu.getInqrTraTypeCd();
-		if (inqrTraTypeCd == null || inqrTraTypeCd.length() < 1) {
-			// 조회거래유형코드 등록(C), 조회(R), 변경(U), 삭제(D), 인쇄(P), 다운로드(E) )
-			throw new Exception("NL MCI전문 공통헤더의 조회거래유형코드(inqrTraTypeCd)는 필수 컬럼입니다.");
-		}
-		
-		// 환경유형코드 P:REAL(RUN), T:TEST(TST), D: 개발(DEV)
-		tgrmCmnnhddvValu.setEnvrTypeCd(this.mciEnvrTypeCd);
-		tgrmCmnnhddvValu.setReqTgrmTnsmDtptDt(MciUtil.getCurrentDate("yyyyMMddHHmmssSSS"));
-		// TODO client ip 정보 set
-		// tgrmCmnnhddvValu.setUserIpAddr(elHeader.getClientIp());
-
-	    // http로 서비스 호출
-        String chUrl = this.mciInnerBaseUrl;
-        log.info("mciUrl " + chUrl);
-	    chUrl = chUrl.replace("{0}", itrfId); // ifId
-
 		String paramStr = MciUtil.toJsonString(inVo);
 		String bbStr = "";
 		try {
-			byte[] bb = MciUtil.sendPostUrl(chUrl, paramStr.getBytes("UTF-8"), timeoutMs);
+			byte[] bb = MciUtil.sendPostUrl(this.mciInnerBaseUrl, paramStr.getBytes("UTF-8"), timeoutMs);
 			bbStr = new String(bb, "UTF-8");
 
 			T outData;
@@ -172,45 +147,22 @@ public class MciClient {
 		}
 	}
 
+	/**
+	 * HTTP+FIELD 방식 통신
+	 * @param <T>
+	 * @param channel
+	 * @param inVo
+	 * @param outClass
+	 * @param timeoutMs
+	 * @return
+	 * @throws Exception
+	 */
 	private <T> T sendHFLD(MciChannelEnum channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
 		// String chUrl = this.mciOuterBaseUrl;
 		
-		// 공통헤더 얻기
+		// MCI 공통 헤더
 		MciCommHeaderVo tgrmCmnnhddvValu = _invokeGetter(inVo,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
 		
-		String glbId = tgrmCmnnhddvValu.getGlbId();
-		if (glbId == null || glbId.length() < 1) {
-			String appliDutjCd = tgrmCmnnhddvValu.getItrfId().substring(0, 3); // 어플리케이션업무코드(3)
-			tgrmCmnnhddvValu.setGlbId(_nextNlGlbId(appliDutjCd));		// Mci 대내 전문과 중복되지않도록 MciUtil 글로벌ID를 공유함 !!!!
-			// 어플리케이션업무코드 - 글로벌ID에 포함되어 있지만 업무팀에서 별도사용이 용이하도록 명시적으로 분리 추가
-			tgrmCmnnhddvValu.setAppliDutjCd(appliDutjCd);
-		}
-		
-		// 어플리케이션상세업무코드 - 고객채널 업무상세구분코드 3째자리 일련번호 규칙 : 앱(0), PC(1), 모바일웹(2)
-		/*	홈페이지(PC) DH1, 홈페이지(모바일웹) DH2, 디지털창구(PC) DA1, 디지털창구(모바일웹) DA2, 디지털보험(PC) DI1
-			디지털보험(모바일웹) DI2, 디지털플랫폼앱 DA0
-		*/
-		String appliDtptDutjCd = tgrmCmnnhddvValu.getAppliDtptDutjCd();
-		if (appliDtptDutjCd == null || appliDtptDutjCd.length() < 3) {
-			throw new Exception("NL MCI전문 공통헤더의 어플리케이션상세업무코드(appliDtptDutjCd)는 필수 컬럼입니다.");
-		}
-
-		// 진행일련번호 - 글로벌ID에서 분리됨, 없으면 001 세팅
-		String pgrsSriaNo = tgrmCmnnhddvValu.getPgrsSriaNo();
-		if (pgrsSriaNo == null || pgrsSriaNo.length() < 1) {
-			tgrmCmnnhddvValu.setPgrsSriaNo("001");
-		}
-		
-		String inqrTraTypeCd = tgrmCmnnhddvValu.getInqrTraTypeCd();
-		if (inqrTraTypeCd == null || inqrTraTypeCd.length() < 1) {
-			// 조회거래유형코드 등록(C), 조회(R), 변경(U), 삭제(D), 인쇄(P), 다운로드(E) )
-			throw new Exception("NL MCI전문 공통헤더의 조회거래유형코드(inqrTraTypeCd)는 필수 컬럼입니다.");
-		}
-		
-		tgrmCmnnhddvValu.setEnvrTypeCd(this.mciEnvrTypeCd);
-		tgrmCmnnhddvValu.setReqTgrmTnsmDtptDt(MciUtil.getCurrentDate("yyyyMMddHHmmssSSS"));
-		// tgrmCmnnhddvValu.setUserIpAddr(elHeader.getClientIp());
-
 		// 대외 MCI 전용 파라메터 세팅
 		tgrmCmnnhddvValu.setFrbuCd(this.mciOuterFrbuCd);
 		tgrmCmnnhddvValu.setCmouDutjCd(this.mciOuterCmouDutjCd);
@@ -274,15 +226,45 @@ public class MciClient {
 		}
 	}
     
-	private void makeMciHeader(MciCommHeaderVo tgrmCmnnhddvValu, String itrfId, String rcvSvcId, String inqrTraTypeCd, String strYmd){
-		// 헤더필수값 설정 후 inVo에 입력
-		tgrmCmnnhddvValu.setItrfId(itrfId);
-		tgrmCmnnhddvValu.setRcvSvcId(rcvSvcId);
-		tgrmCmnnhddvValu.setInqrTraTypeCd(inqrTraTypeCd);		// 조회거래유형코드 등록(C), 조회(R), 변경(U), 삭제(D), 인쇄(P), 다운로드(E) 
-		tgrmCmnnhddvValu.setStrYmd(strYmd);
+	/**
+	 * MCI Header set
+	 * @param tgrmCmnnhddvValu
+	 * @param itrfId
+	 * @param rcvSvcId
+	 * @param inqrTraTypeCd
+	 * @param strYmd
+	 * @throws Exception
+	 */
+	private void makeMciHeader(MciCommHeaderVo tgrmCmnnhddvValu, String itrfId, String rcvSvcId, String inqrTraTypeCd, String strYmd) throws Exception{
+		/**
+		 * 1. MCI 연동 필수값 셋팅
+		 * 2. 비즈니스별 값 셋팅
+		 */
+
+		/** 1. MCI 연동 필수값 셋팅 */ 
+		tgrmCmnnhddvValu.setItrfId(itrfId);						// 인터페이스ID
+		tgrmCmnnhddvValu.setRcvSvcId(rcvSvcId);					// 수신서비스ID
+		tgrmCmnnhddvValu.setInqrTraTypeCd(inqrTraTypeCd);		// 조회거래유형코드 (C:등록, R:조회, U:변경, D:삭제, P:인쇄, E:다운로드)
+		tgrmCmnnhddvValu.setStrYmd(strYmd);						// 기준일자
+		tgrmCmnnhddvValu.setEnvrTypeCd(this.mciEnvrTypeCd);		// 환경유형코드 (P:REAL(RUN), T:TEST(TST), D: 개발(DEV))
+		tgrmCmnnhddvValu.setReqTgrmTnsmDtptDt(MciUtil.getCurrentDate("yyyyMMddHHmmssSSS"));	// 요청전문정송상세일시
+		// tgrmCmnnhddvValu.setUserIpAddr(elHeader.getClientIp());	// 사용자IP정보 TODO requestip set
 	
-		// 어플리케이션상세업무코드 - 고객채널 업무상세구분코드 3째자리 일련번호 규칙 : 앱(0), PC(1), 모바일웹(2)
-		/*	홈페이지(PC) DH1, 홈페이지(모바일웹) DH2, 디지털창구(PC) DA1, 디지털창구(모바일웹) DA2, 디지털보험(PC) DI1
+		String glbId = tgrmCmnnhddvValu.getGlbId();				// 글로벌 전문통신 ID
+		if (glbId == null || glbId.length() < 1) {
+			String appliDutjCd = tgrmCmnnhddvValu.getItrfId().substring(0, 3); // 어플리케이션업무코드(3)
+			tgrmCmnnhddvValu.setGlbId(_nextNlGlbId(appliDutjCd));	// set 글로벌 전문통신 ID
+			tgrmCmnnhddvValu.setAppliDutjCd(appliDutjCd);	// 어플리케이션업무코드 - 글로벌ID에 포함되어 있지만 업무팀에서 별도사용이 용이하도록 명시적으로 분리 추가
+		}
+
+		String pgrsSriaNo = tgrmCmnnhddvValu.getPgrsSriaNo();	// 진행일련번호 - 글로벌ID에서 분리됨, 없으면 001 세팅
+		if (pgrsSriaNo == null || pgrsSriaNo.length() < 1) {
+			tgrmCmnnhddvValu.setPgrsSriaNo("001");
+		}
+		
+		/** 2. 비즈니스별 값 셋팅 */
+		/* 어플리케이션상세업무코드 - 고객채널 업무상세구분코드 3째자리 일련번호 규칙 : 앱(0), PC(1), 모바일웹(2)
+			홈페이지(PC) DH1, 홈페이지(모바일웹) DH2, 디지털창구(PC) DA1, 디지털창구(모바일웹) DA2, 디지털보험(PC) DI1
 			디지털보험(모바일웹) DI2, 디지털플랫폼앱 DA0
 		*/
 		tgrmCmnnhddvValu.setAppliDtptDutjCd(this.mciAppliDtptDutjCd);

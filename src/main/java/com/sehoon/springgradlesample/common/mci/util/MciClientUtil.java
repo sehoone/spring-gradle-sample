@@ -6,9 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.sehoon.springgradlesample.common.mci.constant.MciChannelConst;
-import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVo;
-import com.sehoon.springgradlesample.common.mci.vo.MciCommMsgDataVo;
-import com.sehoon.springgradlesample.common.mci.vo.MciCommMsgHdrVo;
+import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVO;
+import com.sehoon.springgradlesample.common.mci.vo.MciCommMsgDataVO;
+import com.sehoon.springgradlesample.common.mci.vo.MciCommMsgHdrVO;
 import com.sehoon.springgradlesample.common.mci.vo.MciHfldMsgVO;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ public class MciClientUtil {
 		log.info("mciUrl " + chUrl);
 
 		// 공통헤더 디폴트 값 셋팅
-		MciCommHeaderVo tgrmCmnnhddvValu = _invokeGetter(inVo,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
+		MciCommHeaderVO tgrmCmnnhddvValu = _invokeGetter(inVo,"getTgrmCmnnhddvValu", MciCommHeaderVO.class);
 				
 		// validation
 		if (tgrmCmnnhddvValu == null) throw new Exception("NL MCI전문 공통헤더 설정안됨");
@@ -106,7 +106,7 @@ public class MciClientUtil {
 
 			try {
 				// 공통헤더 얻기
-				MciCommHeaderVo outHeader = _invokeGetter(outData,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
+				MciCommHeaderVO outHeader = _invokeGetter(outData,"getTgrmCmnnhddvValu", MciCommHeaderVO.class);
 				
 				if (!"0".equals(outHeader.getTgrmDalRsltCd())) {
 					throw new Exception("오류수신:"+outHeader.getTgrmDalRsltCd());
@@ -146,7 +146,7 @@ public class MciClientUtil {
 		}
 
 		// 공통헤더 얻기
-		MciCommHeaderVo tgrmCmnnhddvValu = _invokeGetter(inVo,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
+		MciCommHeaderVO tgrmCmnnhddvValu = _invokeGetter(inVo,"getTgrmCmnnhddvValu", MciCommHeaderVO.class);
 		
 		// validation
 		if (tgrmCmnnhddvValu == null) throw new Exception("대외 MCI전문 공통헤더 설정안됨");
@@ -198,10 +198,10 @@ public class MciClientUtil {
 		MciUtil.mergeVo(tgrmMsdvValu, getMsgHeader);
 
 		if(tgrmMsdvValu.getMsgHddvValu() == null){
-			MciCommMsgHdrVo mciCommMsgHdrVo = new MciCommMsgHdrVo();
+			MciCommMsgHdrVO mciCommMsgHdrVo = new MciCommMsgHdrVO();
 			mciCommMsgHdrVo.setMsgRpttCc("1");
 			tgrmMsdvValu.setMsgHddvValu(mciCommMsgHdrVo);
-			tgrmMsdvValu.setMsgDtdvValu(new MciCommMsgDataVo()); 
+			tgrmMsdvValu.setMsgDtdvValu(new MciCommMsgDataVO()); 
 		}
 
 		Method toMethod = inVo.getClass().getMethod("setTgrmMsdvValu", MciHfldMsgVO.class);
@@ -233,7 +233,7 @@ public class MciClientUtil {
 			}
 
 			// 공통헤더 얻기
-			MciCommHeaderVo outHeader = _invokeGetter(outData,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
+			MciCommHeaderVO outHeader = _invokeGetter(outData,"getTgrmCmnnhddvValu", MciCommHeaderVO.class);
 			if (!"0".equals(outHeader.getTgrmDalRsltCd())) {
 				new Exception("오류수신:"+outHeader.getTgrmDalRsltCd());
 			} 

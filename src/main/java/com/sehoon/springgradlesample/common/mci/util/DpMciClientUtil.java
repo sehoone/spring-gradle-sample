@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import com.sehoon.springgradlesample.common.mci.constant.MciChannelConst;
-import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVo;
+import com.sehoon.springgradlesample.common.mci.vo.MciCommHeaderVO;
 
 public class DpMciClientUtil {
 	public static <T> T mciCallSerivce(Object inVo, Class<T> outClass, String itrfId, String rcvSvcId, String inqrTraTypeCd) throws Exception {
@@ -23,14 +23,14 @@ public class DpMciClientUtil {
     private static <T> T send(Object inVo, Class<T> outClass, String itrfId, String rcvSvcId, String inqrTraTypeCd, String strYmd) throws Exception {
 	
 		// set 헤더 vo 비즈니스
-		MciCommHeaderVo tgrmCmnnhddvValu = new MciCommHeaderVo();
+		MciCommHeaderVO tgrmCmnnhddvValu = new MciCommHeaderVO();
 		Method getHeaderVo = inVo.getClass().getMethod("getTgrmCmnnhddvValu", new Class[0]);
-		MciCommHeaderVo getHeader = (MciCommHeaderVo) getHeaderVo.invoke(inVo, new Object[0]);
+		MciCommHeaderVO getHeader = (MciCommHeaderVO) getHeaderVo.invoke(inVo, new Object[0]);
 		MciUtil.mergeVo(tgrmCmnnhddvValu, getHeader);
 		
 		makeMciHeader(tgrmCmnnhddvValu, itrfId, rcvSvcId, inqrTraTypeCd, strYmd);
 
-		Method toMethod = inVo.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVo.class);
+		Method toMethod = inVo.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVO.class);
 		toMethod.invoke(inVo, tgrmCmnnhddvValu);
 
 		// set 수신 채널
@@ -42,7 +42,7 @@ public class DpMciClientUtil {
 		return MciClientUtil.send(channel, inVo, outClass);
 	}
 
-	private static void makeMciHeader(MciCommHeaderVo tgrmCmnnhddvValu, String itrfId, String rcvSvcId, String inqrTraTypeCd, String strYmd){
+	private static void makeMciHeader(MciCommHeaderVO tgrmCmnnhddvValu, String itrfId, String rcvSvcId, String inqrTraTypeCd, String strYmd){
 		// 헤더필수값 설정 후 inVo에 입력
 		tgrmCmnnhddvValu.setItrfId(itrfId);
 		tgrmCmnnhddvValu.setRcvSvcId(rcvSvcId);

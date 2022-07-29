@@ -24,9 +24,9 @@ public class MciHfldMsgVO{
         this._offset = iOffset;
     }
 
-    private MciCommMsgHdrVo msgHddvValu;
+    private MciCommMsgHdrVO msgHddvValu;
 
-    private MciCommMsgDataVo msgDtdvValu;
+    private MciCommMsgDataVO msgDtdvValu;
 
     public int getOffset(){
         return _offset;
@@ -54,10 +54,10 @@ public class MciHfldMsgVO{
     }
 
     public void unMarshalFld(byte[] bytes, String encode) throws Exception {
-        this.msgHddvValu = new MciCommMsgHdrVo();
+        this.msgHddvValu = new MciCommMsgHdrVO();
         this.msgHddvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 11));
         _offset += 11;
-        this.msgDtdvValu = new MciCommMsgDataVo();
+        this.msgDtdvValu = new MciCommMsgDataVO();
         this.msgDtdvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 409));
         _offset += 409;
     }

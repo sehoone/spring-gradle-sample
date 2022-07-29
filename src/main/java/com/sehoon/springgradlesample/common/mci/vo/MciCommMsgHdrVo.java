@@ -13,14 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class MciCommMsgHdrVo{
+public class MciCommMsgHdrVO{
     private int _offset;
 
-    public MciCommMsgHdrVo(){
+    public MciCommMsgHdrVO(){
         this._offset = 0;
     }
 
-    public MciCommMsgHdrVo(int iOffset){
+    public MciCommMsgHdrVO(int iOffset){
         this._offset = iOffset;
     }
 
