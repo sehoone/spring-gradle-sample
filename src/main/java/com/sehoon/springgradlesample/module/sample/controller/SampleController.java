@@ -97,7 +97,7 @@ public class SampleController {
 
         SAMPLE00003OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00003OVO.class, "SAMPLE00003", "ONCSC1340", "R");
         // SAMPLE00001OVO outVo = MciClientUtil.send(MciChannelConst.MCI_INNER, inVo, SAMPLE00001OVO.class);
-        
+        log.info("result code "+outVo.getTgrmCmnnhddvValu().getTgrmDalRsltCd());
 
         log.info(outVo.toString());
 
@@ -116,7 +116,7 @@ public class SampleController {
 
         SAMPLE00004OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00004OVO.class, "SAMPLE00004", "ONRIA2212", "R");
         // SAMPLE00002OVO outVo = MciClientUtil.send(MciChannelConst.MCI_OUTER, inVo, SAMPLE00002OVO.class);
-
+        log.info("result code "+outVo.getTgrmCmnnhddvValu().getTgrmDalRsltCd());
         log.info(outVo.toString());
 
         return word;

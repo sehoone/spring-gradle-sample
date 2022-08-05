@@ -5,10 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.sehoon.springgradlesample.common.mciv2.enumeration.MciChannelEnum;
 import com.sehoon.springgradlesample.common.mciv2.util.MciUtil;
 import com.sehoon.springgradlesample.common.mciv2.vo.MciCommHeaderVo;
@@ -17,11 +18,10 @@ import com.sehoon.springgradlesample.common.mciv2.vo.MciCommMsgHdrVo;
 import com.sehoon.springgradlesample.common.mciv2.vo.MciHfldMsgVO;
 import com.sehoon.springgradlesample.config.ApplicationProperties;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Component
-@Slf4j
 public class MciClient {
+
+	private final Logger log = LoggerFactory.getLogger("LOG_MCI");
 
     private String mciHostname;
     private String mciAppliDtptDutjCd;
@@ -64,12 +64,13 @@ public class MciClient {
 		Assert.hasText(rcvSvcId, "서비스ID is empty");
 		Assert.hasText(inqrTraTypeCd, "조회거래유형코드 is empty");
 
-        // set 헤더VO
+		// set 헤더VO
 		MciCommHeaderVo tgrmCmnnhddvValu = new MciCommHeaderVo();
 		Method getHeaderVo = inVo.getClass().getMethod("getTgrmCmnnhddvValu", new Class[0]);
 		MciCommHeaderVo getHeader = (MciCommHeaderVo) getHeaderVo.invoke(inVo, new Object[0]);
-		MciUtil.mergeVo(tgrmCmnnhddvValu, getHeader);
 		
+		MciUtil.mergeVo(tgrmCmnnhddvValu, getHeader);
+
 		makeMciHeader(tgrmCmnnhddvValu, itrfId, rcvSvcId, inqrTraTypeCd, MciUtil.getCurrentDate("yyyyMMdd"));
 
 		Method toMethod = inVo.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVo.class);
@@ -77,14 +78,24 @@ public class MciClient {
 
 		// set 수신 채널. 채널별로 연동타입(JSON/FLD 방식) 정의됨
 		MciChannelEnum channel = MciChannelEnum.MCI_INNER;
-		if(rcvSvcId.indexOf("ONRIA") >= 0 ) {
-        	channel = MciChannelEnum.MCI_OUTER;
-        }
+		if (rcvSvcId.indexOf("ONRIA") >= 0) {
+			channel = MciChannelEnum.MCI_OUTER;
+		}
 
-		return send(channel, inVo, outClass);
+		try {
+			return send(channel, inVo, outClass);
+		} catch (Exception e) {
+			T outData = outClass.getDeclaredConstructor().newInstance();
+			Method setOutDataHeaderMethod = outData.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVo.class);
+			MciCommHeaderVo mciCommHeaderVo = new MciCommHeaderVo();
+			mciCommHeaderVo.setTgrmDalRsltCd("9999");
+			setOutDataHeaderMethod.invoke(outData, mciCommHeaderVo);
+			return outData;
+		}
 	}
 
     public <T> T send(MciChannelEnum channel, Object inVo, Class<T> outClass) throws Exception {
+		// throw new Exception("test");
 		return send(channel, inVo, outClass, 0);
 	}
 
@@ -114,37 +125,20 @@ public class MciClient {
 	 */
 	private <T> T sendJSON(MciChannelEnum channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
 		String paramStr = MciUtil.toJsonString(inVo);
-		String bbStr = "";
-		try {
-			byte[] bb = MciUtil.sendPostUrl(this.mciInnerBaseUrl, paramStr.getBytes("UTF-8"), timeoutMs);
-			bbStr = new String(bb, "UTF-8");
 
-			T outData;
-			try {
-				  outData = MciUtil.fromJsonString(bbStr, outClass);
-			} catch(JsonParseException ee) {
-				throw new JsonParseException(null, "응답형식이 json이 아님");
-			}
+		byte[] bb = MciUtil.sendPostUrl(this.mciInnerBaseUrl, paramStr.getBytes("UTF-8"), timeoutMs);
+		String bbStr = new String(bb, "UTF-8");
 
-			try {
-				// 공통헤더 얻기
-				MciCommHeaderVo outHeader = _invokeGetter(outData,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
-				
-				if (!"0".equals(outHeader.getTgrmDalRsltCd())) {
-					throw new Exception("오류수신:"+outHeader.getTgrmDalRsltCd());
-				} 
-			} catch(NullPointerException ee) {
-			} catch(Exception ee) {
-			}
-			
-			return outData;
-		} catch(NullPointerException e){
-			// 전문 Logging - 실패시
-			throw e;
-		} catch(Exception e){
-			// 전문 Logging - 실패시
-			throw e;
+		T outData = MciUtil.fromJsonString(bbStr, outClass);
+		// 공통헤더 얻기
+		MciCommHeaderVo outHeader = _invokeGetter(outData, "getTgrmCmnnhddvValu", MciCommHeaderVo.class);
+
+		if (!"0".equals(outHeader.getTgrmDalRsltCd())) {
+			throw new Exception("오류수신:" + outHeader.getTgrmDalRsltCd());
 		}
+
+		return outData;
+
 	}
 
 	/**
@@ -159,71 +153,61 @@ public class MciClient {
 	 */
 	private <T> T sendHFLD(MciChannelEnum channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
 		// String chUrl = this.mciOuterBaseUrl;
-		
+
 		// MCI 공통 헤더
-		MciCommHeaderVo tgrmCmnnhddvValu = _invokeGetter(inVo,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
-		
+		MciCommHeaderVo tgrmCmnnhddvValu = _invokeGetter(inVo, "getTgrmCmnnhddvValu", MciCommHeaderVo.class);
+
 		// 대외 MCI 전용 파라메터 세팅
 		tgrmCmnnhddvValu.setFrbuCd(this.mciOuterFrbuCd);
 		tgrmCmnnhddvValu.setCmouDutjCd(this.mciOuterCmouDutjCd);
-		
+
 		MciHfldMsgVO tgrmMsdvValu = new MciHfldMsgVO();
 		Method getHeaderVo = inVo.getClass().getMethod("getTgrmMsdvValu", new Class[0]);
 		MciHfldMsgVO getMsgHeader = (MciHfldMsgVO) getHeaderVo.invoke(inVo, new Object[0]);
 		MciUtil.mergeVo(tgrmMsdvValu, getMsgHeader);
 
-		if(tgrmMsdvValu.getMsgHddvValu() == null){
+		if (tgrmMsdvValu.getMsgHddvValu() == null) {
 			MciCommMsgHdrVo mciCommMsgHdrVo = new MciCommMsgHdrVo();
 			mciCommMsgHdrVo.setMsgRpttCc("1");
 			tgrmMsdvValu.setMsgHddvValu(mciCommMsgHdrVo);
-			tgrmMsdvValu.setMsgDtdvValu(new MciCommMsgDataVo()); 
+			tgrmMsdvValu.setMsgDtdvValu(new MciCommMsgDataVo());
 		}
 
 		Method toMethod = inVo.getClass().getMethod("setTgrmMsdvValu", MciHfldMsgVO.class);
 		toMethod.invoke(inVo, tgrmMsdvValu);
-		
+
 		// 요청파라메터로 변경
-	    byte[] inVoBytes = null;
-	    
-		Method marshalMethod = inVo.getClass().getMethod("marshalFld", String.class );
-		inVoBytes = (byte[])marshalMethod.invoke(inVo, this.mciOuterEncode);
-		
-		log.info("inVoBytes " + new String(inVoBytes));
-	    // https로 서비스 호출
-		try {
-            // TODO 연동가능할때 테스트필요
-			// byte[] bb = CcFwUtil.sendPostUrl(chUrl, inVoBytes, timeoutMs);
-			byte[] bb = inVoBytes;
-			// 응답객체 얻기
-			T outData = outClass.getDeclaredConstructor().newInstance();
-			log.info("outData " + new String(bb) + " length " + new String(bb).length());
+		byte[] inVoBytes = null;
 
-			Method unmarshalMethod = outData.getClass().getMethod("unMarshalFld", byte[].class, String.class );
-			unmarshalMethod.invoke(outData, bb, this.mciOuterEncode);
+		Method marshalMethod = inVo.getClass().getMethod("marshalFld", String.class);
+		inVoBytes = (byte[]) marshalMethod.invoke(inVo, this.mciOuterEncode);
 
-			
-			// 공통메시지 까지는 수신한 경우 에러처리 안함(에러응답시 본문은 안오는 상태일 수 있음)
-			MciHfldMsgVO oMsgHdr = _invokeGetter(outData,"getTgrmMsdvValu", MciHfldMsgVO.class);
-			if (oMsgHdr.getOffset() == 0) {
-				throw new Exception("오류수신: 공통메세지 없음");
-			}
+		log.debug("inData " + new String(inVoBytes));
+		// https로 서비스 호출
 
-			// 공통헤더 얻기
-			MciCommHeaderVo outHeader = _invokeGetter(outData,"getTgrmCmnnhddvValu", MciCommHeaderVo.class);
-			if (!"0".equals(outHeader.getTgrmDalRsltCd())) {
-				new Exception("오류수신:"+outHeader.getTgrmDalRsltCd());
-			} 
+		// TODO 연동가능할때 테스트필요
+		// byte[] bb = CcFwUtil.sendPostUrl(chUrl, inVoBytes, timeoutMs);
+		byte[] bb = inVoBytes;
+		log.debug("outData " + new String(bb));
+		// 응답객체 얻기
+		T outData = outClass.getDeclaredConstructor().newInstance();
+		Method unmarshalMethod = outData.getClass().getMethod("unMarshalFld", byte[].class, String.class);
+		unmarshalMethod.invoke(outData, bb, this.mciOuterEncode);
 
-			// 전문 Logging - 성공시
-
-			return outData;
-		} catch(NullPointerException e){ // sparrow
-			// 전문 Logging - 실패시
-			throw e;
-		} catch(Exception e){
-			// 전문 Logging - 실패시
-			throw e;
+		// 공통메시지 까지는 수신한 경우 에러처리 안함(에러응답시 본문은 안오는 상태일 수 있음)
+		MciHfldMsgVO oMsgHdr = _invokeGetter(outData, "getTgrmMsdvValu", MciHfldMsgVO.class);
+		if (oMsgHdr.getOffset() == 0) {
+			throw new Exception("오류수신: 공통메세지 없음");
 		}
+
+		// 공통헤더 얻기
+		MciCommHeaderVo outHeader = _invokeGetter(outData, "getTgrmCmnnhddvValu", MciCommHeaderVo.class);
+		if (!"0".equals(outHeader.getTgrmDalRsltCd())) {
+			new Exception("오류수신:" + outHeader.getTgrmDalRsltCd());
+		}
+
+		return outData;
+
 	}
     
 	/**
@@ -245,7 +229,7 @@ public class MciClient {
 		tgrmCmnnhddvValu.setItrfId(itrfId);						// 인터페이스ID
 		tgrmCmnnhddvValu.setRcvSvcId(rcvSvcId);					// 수신서비스ID
 		tgrmCmnnhddvValu.setInqrTraTypeCd(inqrTraTypeCd);		// 조회거래유형코드 (C:등록, R:조회, U:변경, D:삭제, P:인쇄, E:다운로드)
-		tgrmCmnnhddvValu.setStrYmd(strYmd);						// 기준일자
+		tgrmCmnnhddvValu.setStrYmd(strYmd);						/// 기준일자
 		tgrmCmnnhddvValu.setEnvrTypeCd(this.mciEnvrTypeCd);		// 환경유형코드 (P:REAL(RUN), T:TEST(TST), D: 개발(DEV))
 		tgrmCmnnhddvValu.setReqTgrmTnsmDtptDt(MciUtil.getCurrentDate("yyyyMMddHHmmssSSS"));	// 요청전문정송상세일시
 		// tgrmCmnnhddvValu.setUserIpAddr(elHeader.getClientIp());	// 사용자IP정보 TODO requestip set
