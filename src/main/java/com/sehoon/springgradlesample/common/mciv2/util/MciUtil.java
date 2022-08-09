@@ -70,6 +70,7 @@ public class MciUtil {
 			conn.setUseCaches(false);
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");// application/x-www-form-urlencoded");
+			// conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
 			conn.setRequestProperty("Proworks-Body", "Y"); // HTTP Body로 JSON 객체를 전달하기 위한 여부
 			conn.setRequestProperty("Proworks-Lang", "ko"); // 다국어 처리를 위한 언어 설정 (미설정 시 프레임워크에서 ko 세팅)
@@ -91,25 +92,25 @@ public class MciUtil {
 				if (out != null)
 					out.close();
 			} catch (IOException e) {
-				log.debug("BeIgnore");
+				log.error("BeIgnore");
 			} catch (Exception e) {
-				log.debug("BeIgnore");
+				log.error("BeIgnore");
 			}
 			try {
 				if (is != null)
 					is.close();
 			} catch (IOException e) {
-				log.debug("BeIgnore");
+				log.error("BeIgnore");
 			} catch (Exception e) {
-				log.debug("BeIgnore");
+				log.error("BeIgnore");
 			}
 			try {
 				if (conn != null)
 					conn.disconnect();
 			} catch (NullPointerException e) {
-				log.debug("BeIgnore");
+				log.error("BeIgnore");
 			} catch (Exception e) {
-				log.debug("BeIgnore");
+				log.error("BeIgnore");
 			}
 		}
 	}

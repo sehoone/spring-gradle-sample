@@ -39,13 +39,13 @@ public class MciCommHeaderVo{
 
     private String appliDutjCd;
 
-    private String appliDtptDutjCd = "DH1";
+    private String appliDtptDutjCd = "CHW";
 
-    private String frbuCd;
+    private String frbuCd = "SHL";
 
-    private String cmouDutjCd;
+    private String cmouDutjCd = "ORC1";
 
-    private String cmouCssfCd;
+    private String cmouCssfCd = "1000";
 
     private String cmouTraCd;
 

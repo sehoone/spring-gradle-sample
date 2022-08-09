@@ -41,6 +41,7 @@ public class MciClient {
         this.mciEnvrTypeCd = applicationProperties.getMciEnvrTypeCd();
         this.mciInnerType = applicationProperties.getMciInnerType();
         this.mciInnerBaseUrl = applicationProperties.getMciInnerBaseUrl();
+		this.mciOuterBaseUrl = applicationProperties.getMciOuterBaseUrl();
         this.mciOuterType = applicationProperties.getMciOuterType();
         this.mciOuterFrbuCd = applicationProperties.getMciOuterFrbuCd();
         this.mciOuterCmouDutjCd = applicationProperties.getMciOuterCmouDutjCd();
@@ -85,6 +86,7 @@ public class MciClient {
 		try {
 			return send(channel, inVo, outClass);
 		} catch (Exception e) {
+			log.error("mciCallSerivce exception", e);
 			T outData = outClass.getDeclaredConstructor().newInstance();
 			Method setOutDataHeaderMethod = outData.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVo.class);
 			MciCommHeaderVo mciCommHeaderVo = new MciCommHeaderVo();
@@ -152,7 +154,7 @@ public class MciClient {
 	 * @throws Exception
 	 */
 	private <T> T sendHFLD(MciChannelEnum channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
-		// String chUrl = this.mciOuterBaseUrl;
+		String chUrl = this.mciOuterBaseUrl;
 
 		// MCI 공통 헤더
 		MciCommHeaderVo tgrmCmnnhddvValu = _invokeGetter(inVo, "getTgrmCmnnhddvValu", MciCommHeaderVo.class);
@@ -186,8 +188,8 @@ public class MciClient {
 		// https로 서비스 호출
 
 		// TODO 연동가능할때 테스트필요
-		// byte[] bb = CcFwUtil.sendPostUrl(chUrl, inVoBytes, timeoutMs);
-		byte[] bb = inVoBytes;
+		byte[] bb = MciUtil.sendPostUrl(chUrl, inVoBytes, timeoutMs);
+		// byte[] bb = inVoBytes;
 		log.debug("outData " + new String(bb));
 		// 응답객체 얻기
 		T outData = outClass.getDeclaredConstructor().newInstance();
