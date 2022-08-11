@@ -63,12 +63,15 @@ public class MciPropManager {
 
 	// properties to hashmap and mciPropMap put
     private void propertiesToMap(Properties prop) {
-        mciPropMap.putAll(prop.entrySet().stream().collect(
-          Collectors.toMap(
-            e -> String.valueOf(e.getKey()),
-            e -> String.valueOf(e.getValue()),
-            (prev, next) -> next, HashMap::new
-        )));
+
+		Map<String, String> propToMap = prop.entrySet().stream().collect(
+			Collectors.toMap(
+			  e -> String.valueOf(e.getKey()),
+			  e -> String.valueOf(e.getValue()),
+			  (prev, next) -> next, HashMap<String, String>::new
+		  ));
+
+        mciPropMap.putAll(propToMap);
     }
 
 	private String currentActiveProfiles() {
