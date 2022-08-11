@@ -5,7 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import com.sehoon.springgradlesample.common.mciv2.util.MciUtil;
-import com.sehoon.springgradlesample.common.mciv2.vo.MciCommHeaderVo;
+import com.sehoon.springgradlesample.common.mciv2.vo.MciCommHeaderVO;
 import com.sehoon.springgradlesample.common.mciv2.vo.MciHfldMsgVO;
 
 import lombok.Data;
@@ -26,7 +26,7 @@ public class SAMPLE00004IVO{
         this._offset = iOffset;
     }
 
-    private MciCommHeaderVo tgrmCmnnhddvValu;
+    private MciCommHeaderVO tgrmCmnnhddvValu;
     private MciHfldMsgVO tgrmMsdvValu;
     private SpecifyDataVO tgrmDtdvValu;
 

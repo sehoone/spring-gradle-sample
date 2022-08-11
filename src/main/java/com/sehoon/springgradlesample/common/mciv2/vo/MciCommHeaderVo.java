@@ -13,15 +13,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class MciCommHeaderVo{
+public class MciCommHeaderVO{
 
     private int _offset;
 
-    public MciCommHeaderVo(){
+    public MciCommHeaderVO(){
         this._offset = 0;
     }
 
-    public MciCommHeaderVo(int iOffset){
+    public MciCommHeaderVO(int iOffset){
         this._offset = iOffset;
     }
 

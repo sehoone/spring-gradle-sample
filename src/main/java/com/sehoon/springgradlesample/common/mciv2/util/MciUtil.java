@@ -128,6 +128,18 @@ public class MciUtil {
 	}
 
 	/**
+	 * JSON String to Object
+	 * @param <T>
+	 * @param str
+	 * @param toValueType
+	 * @return
+	 * @throws Exception
+	 */
+	public static <T> T fromJsonString(String str, T toValueType) throws Exception {
+		return getObjectMapper().readValue(str, toValueType.getClass());
+	}
+
+	/**
 	 * Object to JSON String
 	 * 
 	 * @param obj

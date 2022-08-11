@@ -13,14 +13,15 @@ import org.springframework.util.Assert;
 import com.sehoon.springgradlesample.common.mciv2.enumeration.MciChannelEnum;
 import com.sehoon.springgradlesample.common.mciv2.util.MciUtil;
 import com.sehoon.springgradlesample.common.mciv2.vo.MciCommHeaderVO;
-import com.sehoon.springgradlesample.common.mciv2.vo.MciCommHeaderVO;
 import com.sehoon.springgradlesample.common.mciv2.vo.MciCommMsgDataVO;
 import com.sehoon.springgradlesample.common.mciv2.vo.MciCommMsgHdrVO;
 import com.sehoon.springgradlesample.common.mciv2.vo.MciHfldMsgVO;
+import com.sehoon.springgradlesample.common.vo.EaiReqVO;
+import com.sehoon.springgradlesample.common.vo.EaiResVO;
 import com.sehoon.springgradlesample.config.ApplicationProperties;
 
 @Component
-public class MciClient {
+public class MciClient2 {
 
 	private final Logger log = LoggerFactory.getLogger("LOG_MCI");
 
@@ -36,7 +37,7 @@ public class MciClient {
     private String mciOuterEncode;
     private String glbId = null;
 
-    public MciClient(ApplicationProperties applicationProperties) {
+    public MciClient2(ApplicationProperties applicationProperties) {
         this.mciHostname = applicationProperties.getMciHostname();
         this.mciAppliDtptDutjCd = applicationProperties.getMciAppliDtptDutjCd();
         this.mciEnvrTypeCd = applicationProperties.getMciEnvrTypeCd();
@@ -52,6 +53,8 @@ public class MciClient {
 	/**
 	 * MCI 연동
 	 * @param <T>
+	 * @param <T>
+	 * @param <T1>
 	 * @param inVo
 	 * @param outClass
 	 * @param itrfId
@@ -60,7 +63,7 @@ public class MciClient {
 	 * @return
 	 * @throws Exception
 	 */
-    public <T> T mciCallSerivce(Object inVo, Class<T> outClass, String itrfId, String rcvSvcId, String inqrTraTypeCd) throws Exception {
+    public <T1, T2> EaiResVO<T2> mciCallSerivce(EaiReqVO<T1> inVo, EaiResVO<T2> outVo, String itrfId, String rcvSvcId, String inqrTraTypeCd) throws Exception {
         // 필수값 체크
 		Assert.hasText(itrfId, "인터페이스ID is empty");
 		Assert.hasText(rcvSvcId, "서비스ID is empty");
@@ -68,9 +71,11 @@ public class MciClient {
 
 		// set 헤더VO
 		MciCommHeaderVO tgrmCmnnhddvValu = new MciCommHeaderVO();
-		Method getHeaderVo = inVo.getClass().getMethod("getTgrmCmnnhddvValu", new Class[0]);
-		MciCommHeaderVO getHeader = (MciCommHeaderVO) getHeaderVo.invoke(inVo, new Object[0]);
+		// Method getHeaderVo = inVo.getClass().getMethod("getTgrmCmnnhddvValu", new Class[0]);
+		// MciCommHeaderVO getHeader = (MciCommHeaderVO) getHeaderVo.invoke(inVo, new Object[0]);
 		
+		MciCommHeaderVO getHeader = inVo.getTgrmCmnnhddvValu();
+
 		MciUtil.mergeVo(tgrmCmnnhddvValu, getHeader);
 
 		makeMciHeader(tgrmCmnnhddvValu, itrfId, rcvSvcId, inqrTraTypeCd, MciUtil.getCurrentDate("yyyyMMdd"));
@@ -85,32 +90,32 @@ public class MciClient {
 		}
 
 		try {
-			return send(channel, inVo, outClass);
+			return send(channel, inVo, outVo);
 		} catch (Exception e) {
-			log.error("mciCallSerivce exception", e);
-			T outData = outClass.getDeclaredConstructor().newInstance();
-			Method setOutDataHeaderMethod = outData.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVO.class);
-			MciCommHeaderVO mciCommHeaderVo = new MciCommHeaderVO();
-			mciCommHeaderVo.setTgrmDalRsltCd("9999");
-			setOutDataHeaderMethod.invoke(outData, mciCommHeaderVo);
-			return outData;
+			// log.error("mciCallSerivce exception", e);
+			// T2 outData = outClass.getDeclaredConstructor().newInstance();
+			// Method setOutDataHeaderMethod = outData.getClass().getMethod("setTgrmCmnnhddvValu", MciCommHeaderVO.class);
+			// MciCommHeaderVO mciCommHeaderVo = new MciCommHeaderVO();
+			// mciCommHeaderVo.setTgrmDalRsltCd("9999");
+			// setOutDataHeaderMethod.invoke(outData, mciCommHeaderVo);
+			// return outData;
 		}
 	}
 
-    public <T> T send(MciChannelEnum channel, Object inVo, Class<T> outClass) throws Exception {
+    public <T1, T2> EaiResVO<T2> send(MciChannelEnum channel, EaiReqVO<T1> inVo, EaiResVO<T2> outVo) throws Exception {
 		// throw new Exception("test");
-		return send(channel, inVo, outClass, 0);
+		return send(channel, inVo, outVo, 0);
 	}
 
-	public <T> T send(MciChannelEnum channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
+	public <T1, T2> EaiResVO<T2> send(MciChannelEnum channel, EaiReqVO<T1> inVo, EaiResVO<T2> outVo, int timeoutMs) throws Exception {
 		// 채널별로 연동 타입이 있음
 		String chType = (channel == MciChannelEnum.MCI_INNER) ? this.mciInnerType : this.mciOuterType;
 
 		switch(chType) {
 			case "JSON":	// 대내 MCI용 JSON 방식
-				return sendJSON(channel, inVo, outClass, timeoutMs);
+				return sendJSON(channel, inVo, outVo, timeoutMs);
 			case "HFLD":	// 대외 MCI용 https + FLD 방식
-				return sendHFLD(channel, inVo, outClass, timeoutMs);
+				// return sendHFLD(channel, inVo, outVo, timeoutMs);
 			default:
 				throw new Exception(channel.getValue()+" MCI에서 처리가능한 타입이 아님("+chType+")");
 		}
@@ -126,13 +131,13 @@ public class MciClient {
 	 * @return
 	 * @throws Exception
 	 */
-	private <T> T sendJSON(MciChannelEnum channel, Object inVo, Class<T> outClass, int timeoutMs) throws Exception {
+	private <T1, T2> EaiResVO<T2> sendJSON(MciChannelEnum channel, EaiReqVO<T1> inVo, EaiResVO<T2> outVo, int timeoutMs) throws Exception {
 		String paramStr = MciUtil.toJsonString(inVo);
 
 		byte[] bb = MciUtil.sendPostUrl(this.mciInnerBaseUrl, paramStr.getBytes("UTF-8"), timeoutMs);
 		String bbStr = new String(bb, "UTF-8");
 
-		T outData = MciUtil.fromJsonString(bbStr, outClass);
+		T outData = MciUtil.fromJsonString(bbStr, outVo);
 		// 공통헤더 얻기
 		MciCommHeaderVO outHeader = _invokeGetter(outData, "getTgrmCmnnhddvValu", MciCommHeaderVO.class);
 

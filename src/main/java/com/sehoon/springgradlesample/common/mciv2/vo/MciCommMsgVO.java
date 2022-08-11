@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper=false)
 public class MciCommMsgVO{
-    private MciCommMsgHdrVo msgHddvValu;
+    private MciCommMsgHdrVO msgHddvValu;
 
-    private MciCommMsgDataVo msgDtdvValu;
+    private MciCommMsgDataVO msgDtdvValu;
 }

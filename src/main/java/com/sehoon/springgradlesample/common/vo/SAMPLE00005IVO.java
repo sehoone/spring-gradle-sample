@@ -15,19 +15,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class SAMPLE00001IVO{
+public class SAMPLE00005IVO{
     private int _offset;
 
-    public SAMPLE00001IVO(){
+    public SAMPLE00005IVO(){
         this._offset = 0;
     }
 
-    public SAMPLE00001IVO(int iOffset){
+    public SAMPLE00005IVO(int iOffset){
         this._offset = iOffset;
     }
 
-    private MciCommHeaderVO tgrmCmnnhddvValu;
-    private SpecifyDataVO tgrmDtdvValu;
+    private String cno;
+    private String userName;
+    private String userPhone;
+    private String age;
 
     public byte[] marshalFld(){
         return marshalFld( "UTF-8" ); 
@@ -36,8 +38,10 @@ public class SAMPLE00001IVO{
 	public byte[] marshalFld(String encode){
         try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 DataOutputStream out = new DataOutputStream(bout);) {
-            out.write( this.tgrmCmnnhddvValu.marshalFld() );
-            out.write( this.tgrmDtdvValu.marshalFld() );
+            out.write( MciUtil.strToSpBytes(this.cno , 8, encode ) );
+            out.write( MciUtil.strToSpBytes(this.userName , 40, encode ) );
+            out.write( MciUtil.strToSpBytes(this.userPhone , 20, encode ) );
+            out.write( MciUtil.strToSpBytes(this.age , 5, encode ) );
             
             return bout.toByteArray();
         } catch (IOException e) {
@@ -51,9 +55,13 @@ public class SAMPLE00001IVO{
     }
 
     public void unMarshalFld(byte[] bytes, String encode) throws Exception {
-        this.tgrmCmnnhddvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 800));
-        _offset += 800;
-        this.tgrmDtdvValu.unMarshalFld(MciUtil.bytesToByte(bytes, _offset, 73));
-        _offset += 73;
+        this.cno = MciUtil.getTrimmedString(bytes, _offset, 8, encode);
+        _offset += 8;
+        this.userName = MciUtil.getTrimmedString(bytes, _offset, 40, encode);
+        _offset += 40;
+        this.userPhone = MciUtil.getTrimmedString(bytes, _offset, 20, encode);
+        _offset += 20;
+        this.age = MciUtil.getTrimmedString(bytes, _offset, 5, encode);
+        _offset += 5;
     }
 }
