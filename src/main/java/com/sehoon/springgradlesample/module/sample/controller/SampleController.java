@@ -9,16 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sehoon.springgradlesample.common.mci.util.DpMciClientUtil;
 import com.sehoon.springgradlesample.common.mciv2.client.MciClient;
-import com.sehoon.springgradlesample.common.vo.EaiReqVO;
 import com.sehoon.springgradlesample.common.vo.SAMPLE00001IVO;
 import com.sehoon.springgradlesample.common.vo.SAMPLE00001OVO;
 import com.sehoon.springgradlesample.common.vo.SAMPLE00002IVO;
 import com.sehoon.springgradlesample.common.vo.SAMPLE00002OVO;
-import com.sehoon.springgradlesample.common.vo.SAMPLE00003IVO;
-import com.sehoon.springgradlesample.common.vo.SAMPLE00003OVO;
-import com.sehoon.springgradlesample.common.vo.SAMPLE00004IVO;
-import com.sehoon.springgradlesample.common.vo.SAMPLE00004OVO;
-import com.sehoon.springgradlesample.common.vo.SAMPLE00005IVO;
 import com.sehoon.springgradlesample.common.vo.SpecifyDataVO;
 import com.sehoon.springgradlesample.config.ApplicationProperties;
 
@@ -88,63 +82,63 @@ public class SampleController {
         return word;
     }
 
-    @GetMapping("/mci/v2/json-type")
-    public String jsonTypeV2() throws Exception {
-        String word = applicationProperties.getCustomVal();
-        log.info("dd1 "+mciClient.toString());
-        SAMPLE00003IVO inVo = new SAMPLE00003IVO();
-        SpecifyDataVO specifyDataVO = new SpecifyDataVO();
-        specifyDataVO.setCno("33221443");
-        inVo.setTgrmDtdvValu(specifyDataVO);
+    // @GetMapping("/mci/v2/json-type")
+    // public String jsonTypeV2() throws Exception {
+    //     String word = applicationProperties.getCustomVal();
+    //     log.info("dd1 "+mciClient.toString());
+    //     SAMPLE00003IVO inVo = new SAMPLE00003IVO();
+    //     SpecifyDataVO specifyDataVO = new SpecifyDataVO();
+    //     specifyDataVO.setCno("33221443");
+    //     inVo.setTgrmDtdvValu(specifyDataVO);
 
-        SAMPLE00003OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00003OVO.class, "SAMPLE00003", "ONCSC1340", "R");
-        // SAMPLE00001OVO outVo = MciClientUtil.send(MciChannelConst.MCI_INNER, inVo, SAMPLE00001OVO.class);
-        log.info("result code "+outVo.getTgrmCmnnhddvValu().getTgrmDalRsltCd());
+    //     SAMPLE00003OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00003OVO.class, "SAMPLE00003", "ONCSC1340", "R");
+    //     // SAMPLE00001OVO outVo = MciClientUtil.send(MciChannelConst.MCI_INNER, inVo, SAMPLE00001OVO.class);
+    //     log.info("result code "+outVo.getTgrmCmnnhddvValu().getTgrmDalRsltCd());
 
-        log.info(outVo.toString());
+    //     log.info(outVo.toString());
 
-        return word;
-    }
+    //     return word;
+    // }
 
-    @GetMapping("/mci/v2/fld-type")
-    public String fldTypeV2() throws Exception {
-        String word = applicationProperties.getCustomVal();
-        log.info("dd2 "+mciClient.toString());
-        SAMPLE00004IVO inVo = new SAMPLE00004IVO();
-        // inVo.getTgrmCmnnhddvValu().setAcntOgnzNo("tt!!");;
-        SpecifyDataVO specifyDataVO = new SpecifyDataVO();
-        specifyDataVO.setCno("12389120");
-        inVo.setTgrmDtdvValu(specifyDataVO);
+    // @GetMapping("/mci/v2/fld-type")
+    // public String fldTypeV2() throws Exception {
+    //     String word = applicationProperties.getCustomVal();
+    //     log.info("dd2 "+mciClient.toString());
+    //     SAMPLE00004IVO inVo = new SAMPLE00004IVO();
+    //     // inVo.getTgrmCmnnhddvValu().setAcntOgnzNo("tt!!");;
+    //     SpecifyDataVO specifyDataVO = new SpecifyDataVO();
+    //     specifyDataVO.setCno("12389120");
+    //     inVo.setTgrmDtdvValu(specifyDataVO);
 
-        SAMPLE00004OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00004OVO.class, "SAMPLE00004", "ONRIA2212", "R");
-        // SAMPLE00002OVO outVo = MciClientUtil.send(MciChannelConst.MCI_OUTER, inVo, SAMPLE00002OVO.class);
-        log.info("result code "+outVo.getTgrmCmnnhddvValu().getTgrmDalRsltCd());
-        log.info(outVo.toString());
+    //     SAMPLE00004OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00004OVO.class, "SAMPLE00004", "ONRIA2212", "R");
+    //     // SAMPLE00002OVO outVo = MciClientUtil.send(MciChannelConst.MCI_OUTER, inVo, SAMPLE00002OVO.class);
+    //     log.info("result code "+outVo.getTgrmCmnnhddvValu().getTgrmDalRsltCd());
+    //     log.info(outVo.toString());
 
-        return word;
-    }
+    //     return word;
+    // }
 
-    @GetMapping("/mci/v2/fld-type2")
-    public String fldTypeV22() throws Exception {
-        String word = applicationProperties.getCustomVal();
-        log.info("dd2 "+mciClient.toString());
+    // @GetMapping("/mci/v2/fld-type2")
+    // public String fldTypeV22() throws Exception {
+    //     String word = applicationProperties.getCustomVal();
+    //     log.info("dd2 "+mciClient.toString());
 
-        EaiReqVO<SAMPLE00005IVO> inVo = new EaiReqVO<SAMPLE00005IVO>(true);
-        inVo.getTgrmDtdvValu().setCno("12389120");
+    //     EaiReqVO<SAMPLE00005IVO> inVo = new EaiReqVO<SAMPLE00005IVO>(true);
+    //     inVo.getTgrmDtdvValu().setCno("12389120");
 
-        SAMPLE00004OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00004OVO.class, "SAMPLE00004", "ONRIA2212", "R");
+    //     SAMPLE00004OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00004OVO.class, "SAMPLE00004", "ONRIA2212", "R");
 
-        // inVo.getTgrmCmnnhddvValu().setAcntOgnzNo("tt!!");;
-        // SpecifyDataVO specifyDataVO = new SpecifyDataVO();
-        // specifyDataVO.setCno("12389120");
-        // inVo.setTgrmDtdvValu(specifyDataVO);
+    //     // inVo.getTgrmCmnnhddvValu().setAcntOgnzNo("tt!!");;
+    //     // SpecifyDataVO specifyDataVO = new SpecifyDataVO();
+    //     // specifyDataVO.setCno("12389120");
+    //     // inVo.setTgrmDtdvValu(specifyDataVO);
 
-        // SAMPLE00004OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00004OVO.class, "SAMPLE00004", "ONRIA2212", "R");
-        // // SAMPLE00002OVO outVo = MciClientUtil.send(MciChannelConst.MCI_OUTER, inVo, SAMPLE00002OVO.class);
-        // log.info("result code "+outVo.getTgrmCmnnhddvValu().getTgrmDalRsltCd());
-        // log.info(outVo.toString());
+    //     // SAMPLE00004OVO outVo = mciClient.mciCallSerivce(inVo, SAMPLE00004OVO.class, "SAMPLE00004", "ONRIA2212", "R");
+    //     // // SAMPLE00002OVO outVo = MciClientUtil.send(MciChannelConst.MCI_OUTER, inVo, SAMPLE00002OVO.class);
+    //     // log.info("result code "+outVo.getTgrmCmnnhddvValu().getTgrmDalRsltCd());
+    //     // log.info(outVo.toString());
 
-        return word;
-    }
+    //     return word;
+    // }
 
 }

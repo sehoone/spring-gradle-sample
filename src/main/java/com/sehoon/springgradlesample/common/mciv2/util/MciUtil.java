@@ -9,14 +9,16 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.sehoon.springgradlesample.common.mci.manager.MciPropManager;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +29,7 @@ public class MciUtil {
 
 	/**
 	 * get ObjectMapper
+	 * 
 	 * @return
 	 */
 	private static synchronized ObjectMapper getObjectMapper() {
@@ -40,6 +43,7 @@ public class MciUtil {
 
 	/**
 	 * http post 요청
+	 * 
 	 * @param stUrl
 	 * @param postData
 	 * @param timeoutMs
@@ -57,7 +61,7 @@ public class MciUtil {
 		byte[] buff = new byte[1024];
 
 		try {
-
+			log.info("stUrl " + stUrl);
 			URL url = new URL(stUrl);
 
 			conn = (HttpURLConnection) url.openConnection();
@@ -69,17 +73,21 @@ public class MciUtil {
 			conn.setDoOutput(true);
 			conn.setUseCaches(false);
 			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");// application/x-www-form-urlencoded");
-			// conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			// conn.setRequestProperty("Content-Type", "application/json;
+			// charset=euc-kr");// application/x-www-form-urlencoded");
+			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			conn.setRequestProperty("Content-Length", Integer.toString(postData.length));
 			conn.setRequestProperty("Proworks-Body", "Y"); // HTTP Body로 JSON 객체를 전달하기 위한 여부
 			conn.setRequestProperty("Proworks-Lang", "ko"); // 다국어 처리를 위한 언어 설정 (미설정 시 프레임워크에서 ko 세팅)
 
+			log.info("method " + conn.getRequestMethod());
 			out = conn.getOutputStream();
 
 			out.write(postData);
 
 			is = conn.getInputStream();
+			log.info("responsecode " + conn.getResponseCode());
+
 			byteArrayOutputStream = new ByteArrayOutputStream();
 			while ((readCount = is.read(buff)) != -1) {
 				byteArrayOutputStream.write(buff, 0, readCount);
@@ -117,6 +125,7 @@ public class MciUtil {
 
 	/**
 	 * JSON String to Object
+	 * 
 	 * @param <T>
 	 * @param str
 	 * @param toValueType
@@ -125,18 +134,6 @@ public class MciUtil {
 	 */
 	public static <T> T fromJsonString(String str, Class<T> toValueType) throws Exception {
 		return getObjectMapper().readValue(str, toValueType);
-	}
-
-	/**
-	 * JSON String to Object
-	 * @param <T>
-	 * @param str
-	 * @param toValueType
-	 * @return
-	 * @throws Exception
-	 */
-	public static <T> T fromJsonString(String str, T toValueType) throws Exception {
-		return getObjectMapper().readValue(str, toValueType.getClass());
 	}
 
 	/**
@@ -152,6 +149,7 @@ public class MciUtil {
 
 	/**
 	 * Object merge
+	 * 
 	 * @param obj
 	 * @param update
 	 */
@@ -186,17 +184,26 @@ public class MciUtil {
 
 	/**
 	 * 현재시간 by format
+	 * 
 	 * @param format
 	 * @return
 	 */
 	public static String getCurrentDate(String format) {
 		LocalDate dateObj = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
 		return dateObj.format(formatter);
+	}
+
+	public static String getCurrentDateTime(String format) {
+		Calendar cal = Calendar.getInstance();
+		Date now = cal.getTime();
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		return sdf.format(now);
 	}
 
 	/**
 	 * int to String. 파라메터의 길이만큼 문자열을 채움
+	 * 
 	 * @param val
 	 * @param length
 	 * @return
@@ -232,26 +239,43 @@ public class MciUtil {
 
 	/**
 	 * get mci properties value
+	 * 
 	 * @param key
 	 * @return
 	 */
-	public static String getMciProp(String key) {
-		return MciPropManager.getInstance().getProp(key);
-	}
+	// public static String getMciProp(String key) {
+	// return MciPropManager.getInstance().getProp(key);
+	// }
 
 	/**
-	 * String to byte. by encode UTF-8
+	 * String to byte. by encode euc-kr
+	 * 
 	 * @param str
 	 * @param len
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
 	public static byte[] strToSpBytes(String str, int len) throws UnsupportedEncodingException {
-		return strToSpBytes(str, len, "UTF-8");
+		return strToSpBytes(str, len, "euc-kr");
+	}
+
+	public static byte[] objToSpBytes(Object obj, int len, String encode) throws UnsupportedEncodingException {
+		String str = null;
+		if (obj != null)
+			str = obj.toString();
+		return strToSpBytes(str, len, encode);
+	}
+
+	public static byte[] objToSpBytesR(Object obj, int len, String encode) throws UnsupportedEncodingException {
+		String str = null;
+		if (obj != null)
+			str = obj.toString();
+		return strToSpBytesR(str, len, encode);
 	}
 
 	/**
 	 * String to byte
+	 * 
 	 * @param str
 	 * @param len
 	 * @param encode
@@ -284,8 +308,36 @@ public class MciUtil {
 		return bytes;
 	}
 
+	public static byte[] strToSpBytesR(String str, int len, String encode) throws UnsupportedEncodingException {
+		if (len < 1)
+			return null;
+		byte[] bytes = new byte[len];
+		if (str == null) {
+			for (int j = 0; j < len; j++)
+				bytes[j] = 32;
+			return bytes;
+		}
+		byte[] strBytes = null;
+
+		if (encode != null && !"null".equalsIgnoreCase(encode) && !"".equalsIgnoreCase(encode)) {
+			strBytes = str.getBytes(encode);
+		} else {
+			strBytes = str.getBytes();
+		}
+
+		int strLen = strBytes.length;
+		int i;
+		if (strLen > len)
+			strLen = len;
+		for (i = 0; i < len - strLen; i++)
+			bytes[i] = 48;
+		System.arraycopy(strBytes, 0, bytes, i, strLen);
+		return bytes;
+	}
+
 	/**
 	 * get trimmed String by specify buffer byte
+	 * 
 	 * @param buf
 	 * @param offset
 	 * @param length
@@ -313,7 +365,7 @@ public class MciUtil {
 	}
 
 	public static String getTrimmedString(byte[] buf, int offset, int length) throws Exception {
-		return getTrimmedString(buf, offset, length, "UTF-8");
+		return getTrimmedString(buf, offset, length, "euc-kr");
 	}
 
 	public static int bytesToInt(byte[] buf, int offset, int length, String encode) throws Exception {
@@ -322,12 +374,13 @@ public class MciUtil {
 	}
 
 	public static int bytesToInt(byte[] buf, int offset, int length) throws Exception {
-		String str = getTrimmedString(buf, offset, length, "UTF-8");
+		String str = getTrimmedString(buf, offset, length, "euc-kr");
 		return parseToInt(str);
 	}
 
 	/**
 	 * String to int
+	 * 
 	 * @param inputValue
 	 * @return
 	 * @throws Exception
