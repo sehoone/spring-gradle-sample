@@ -5,3 +5,6 @@ server:
 logging:
   level:
     ROOT: INFO  
+
+application:
+  custom-val: sampleVal2

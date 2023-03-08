@@ -12,15 +12,3 @@ logging:
 
 application:
   custom-val: sampleVal2
-  mci-hostname: health
-  mci-appli-dtpt-dutj-cd: HW1
-  mci-envr-type-cd: D
-
-  mci-inner-type: JSON
-  mci-inner-base-url: http://localhost:8081/api/echo/
-
-  mci-outer-type: HFLD
-  mci-outer-base-url: http://localhost:8081/api/echo/
-  mci-outer-frbu-cd: CD
-  mci-outer-cmou-dutj-cd: AB
-  mci-outer-encode: UTF-8
