@@ -1,1 +1,10 @@
+// pluginManagement {
+//     repositories {
+//         maven {
+//             allowInsecureProtocol true	// privte nexus가 https를 사용안할경우 추가
+//             url "http://10.240.100.1:2000/repository/my-maven-hosted/"	// privete nexus url
+//         }
+//     }
+// }
+
 rootProject.name = 'spring-gradle-sample'
