@@ -34,6 +34,9 @@ dependencies {
 	// testImplementation 'org.springframework.security:spring-security-test'
 	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.3'
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+	implementation 'org.aspectj:aspectjweaver:1.9.9.1'
+	// swagger
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.13'
 
 }
 
